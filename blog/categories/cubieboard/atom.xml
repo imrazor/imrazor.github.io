@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Cubieboard | Imrazor's Blog]]></title>
+  <link href="http://imrazor.github.io/blog/categories/cubieboard/atom.xml" rel="self"/>
+  <link href="http://imrazor.github.io/"/>
+  <updated>2015-03-06T21:10:13+08:00</updated>
+  <id>http://imrazor.github.io/</id>
+  <author>
+    <name><![CDATA[imrazor]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[使用cubieboard创建热点]]></title>
+    <link href="http://imrazor.github.io/blog/2015/01/14/use-cubieboard-as-an-ap/"/>
+    <updated>2015-01-14T22:58:50+08:00</updated>
+    <id>http://imrazor.github.io/blog/2015/01/14/use-cubieboard-as-an-ap</id>
+    <content type="html"><![CDATA[<p>最近看到有人折腾树莓派，自己也想倒腾点东西。树莓派性能较差，于是买了个国产的板子——cubieboard</p>
+
+<p><img src="/images/blog/2015/A47474333AC5351B48B4C6624CF05362.png" alt="" /></p>
+
+<p><strong>开始</strong></p>
+
+<p>首先是装系统，我装的debian server（<a href="http://forum.cubietech.com/forum.php?mod=viewthread&amp;tid=3350&amp;extra=&amp;page=1">下载地址</a>），双卡板系统通过Win32DikImager可以很方便的刷好</p>
+
+<p>接下来要驱动无线网卡，我的usb无线网卡为edup-n8508gs，系统中自带8192cu驱动，是可以支持我的无线网卡的</p>
+
+<!--more-->
+
+
+<p><strong>安装hostapd</strong></p>
+
+<p>apt-get的hostapd无法跑起来，各种错误，无线网卡还分芯片，我的无线网卡是Realtek芯片，只有特定的hostapd才能驱动</p>
+
+<p>github上下载别人处理好的源码来编译和安装：</p>
+
+<pre><code>wget https://github.com/jenssegers/RTL8188-hostapd/archive/v1.1.tar.gz
+tar -zxvf v1.1.tar.gz
+cd RTL8188-hostapd-1.1/hostapd
+sudo make
+sudo make install
+</code></pre>
+
+<p>最后hostapd.conf要类似这么配置:</p>
+
+<pre><code>interface=wlan0
+driver=rtl871xdrv
+ssid=wifi
+channel=1
+wmm_enabled=0
+wpa=1
+wpa_passphrase=12345678
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+auth_algs=1
+macaddr_acl=0
+</code></pre>
+
+<p>参数不一一说明了，文档中都有说明，这里密码设置为1-8。启动hostapd</p>
+
+<pre><code>sudo /etc/init.d/hostapd start
+</code></pre>
+
+<p><strong>安装dnsmasq</strong></p>
+
+<p>dnsmasp的作用是让你的设备连接ap热点后，可以自动获取ip地址，首先：</p>
+
+<pre><code>sudo apt-get dnsmasp
+</code></pre>
+
+<p>之后修改dnsmasq的配置文件/etc/dnsmasq.conf：</p>
+
+<pre><code>#Name:Default
+#Type:DNSMASQ
+interface=wlan0
+dhcp-range=192.168.0.2,192.168.0.255,12h;
+server=/www.google.com/8.8.8.8
+</code></pre>
+
+<p>配置好后，启动</p>
+
+<pre><code>sudo /etc/init.d/dnsmasq start
+</code></pre>
+
+<p><strong>设置开机生效</strong></p>
+
+<p>在/etc/rl.local中加入如下代码，这样即使重启cb2也能生效：</p>
+
+<pre><code>ifconfig wlan0 192.168.0.1 netmask 255.255.255.0
+ip addr add 192.168.0.1/24 dev wlan0
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+</code></pre>
+
+<p>在/etc/sysctl.conf加入：</p>
+
+<pre><code>net.ipv4.ip_forward = 1
+</code></pre>
+
+<p>重启设备，之后就能看到你的热点（名叫wifi）了，快连接你的热点吧</p>
+]]></content>
+  </entry>
+  
+</feed>

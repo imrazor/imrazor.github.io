@@ -1,1 +1,684 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Imrazor's Blog</title>
+  <meta name="author" content="imrazor">
+
+  
+  <meta name="description" content="最近看到有人折腾树莓派，自己也想倒腾点东西。树莓派性能较差，于是买了个国产的板子——cubieboard 开始 首先是装系统，我装的debian server（下载地址），双卡板系统通过Win32DikImager可以很方便的刷好 接下来要驱动无线网卡，我的usb无线网卡为edup-n8508gs &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://imrazor.github.io">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <meta name="google-site-verification" content="Gp52qtiSPK2bGlO9wzesss5gmlgD34wb05rGOHuJtNY" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Imrazor's Blog</a></h1>
+  
+    <h2>Stay Hungry, Stay Foolish</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:imrazor.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a target="_blank" href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-14T22:58:50+08:00" pubdate data-updated="true">2015-01-14 10:58PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近看到有人折腾树莓派，自己也想倒腾点东西。树莓派性能较差，于是买了个国产的板子——cubieboard</p>
+
+<p><img src="/images/blog/2015/A47474333AC5351B48B4C6624CF05362.png" alt="" /></p>
+
+<p><strong>开始</strong></p>
+
+<p>首先是装系统，我装的debian server（<a href="http://forum.cubietech.com/forum.php?mod=viewthread&amp;tid=3350&amp;extra=&amp;page=1">下载地址</a>），双卡板系统通过Win32DikImager可以很方便的刷好</p>
+
+<p>接下来要驱动无线网卡，我的usb无线网卡为edup-n8508gs，系统中自带8192cu驱动，是可以支持我的无线网卡的</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/14/use-cubieboard-as-an-ap/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-20T23:23:53+08:00" pubdate data-updated="true">2014-10-20 11:23PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文仅供学习和交流，如有侵权或不妥，请联系我删除</p>
+
+<p>之前写了篇lldb联机调试的文章，恰好Reveal的试用到期了，于是拿来练练手。本文参考了<a href="http://www.yangch.info/?p=1230">&ldquo;[原创]破解Reveal购买提示框&rdquo;</a>，但是去掉了“Free trial has ended” ：），并假设你已经了解了一些lldb的基本调试命令</p>
+
+<p>首先用Hopper分析Reveal源程序，搜索关键字trial，首先发现了IBATrialModeReminderPresenter</p>
+
+<p><img src="/images/blog/2014-10-20/controller_image.png" alt="" /></p>
+
+<p>用lldb调试下，断点在图中内存地址中</p>
+
+<pre><code>(lldb) target create "/Applications/Reveal.app"
+Current executable set to '/Applications/Reveal.app' (x86_64).
+(lldb) b -a 0000000100094180
+Breakpoint 1: address = 0x0000000100094180
+(lldb) r
+Process 4255 launched: '/Applications/Reveal.app/Contents/MacOS/Reveal' (x86_64)
+2014-10-20 19:40:37.548 Reveal[4255:d0b] Unknown class          IBAViewHierarchyCanvasSharingMenu in Interface Builder file at path /Applications/  Reveal.app/Contents/Resources/en.lproj/MainMenu.nib.
+2014-10-20 19:40:37.554 Reveal[4255:d0b]  INFO: Log Level Enabled
+2014-10-20 19:40:37.554 Reveal[4255:d0b]  WARN: Log Level Enabled
+2014-10-20 19:40:37.554 Reveal[4255:d0b] ERROR: Log Level Enabled
+2014-10-20 19:40:37.574 Reveal[4255:d0b]  INFO: Reveal Automatic Updates are    enabled!
+2014-10-20 19:40:37.862 Reveal[4255:d0b] [HockeySDK] WARNING: Detecting crashes is  NOT enabled due to running the app with a debugger attached.
+2014-10-20 19:40:37.863 Reveal[4255:d0b]  INFO: Reveal Crash Reporting is enabled!
+Process 4255 stopped
+* thread #1: tid = 0x3abbf, 0x0000000100094180  Reveal`___lldb_unnamed_function3544$$Reveal, queue = 'com.apple.main-thread', stop reason   = breakpoint 1.1
+    frame #0: 0x0000000100094180 Reveal`___lldb_unnamed_function3544$$Reveal
+Reveal`___lldb_unnamed_function3544$$Reveal:
+-&gt; 0x100094180:  pushq  %rbp
+   0x100094181:  movq   %rsp, %rbp
+   0x100094184:  leaq   0xa05c5(%rip), %rsi       ; { /usr/lib/ libobjc.A.dylib`objc_msgSend_fixedup, "alloc" }
+   0x10009418b:  callq  *0xa05bf(%rip)            ; { /usr/lib/ libobjc.A.dylib`objc_msgSend_fixedup, "alloc" }
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-14T23:20:28+08:00" pubdate data-updated="true">2014-10-14 11:20PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>文章翻译自 <a href="http://www.iphonedevwiki.net/index.php/Debugserver">这里</a></p>
+
+<p>这是一篇粗略的翻译文章，只翻译第二种方法</p>
+
+<p>首先我们需要一台越狱的设备，并且安装好了ssh</p>
+
+<p>debugserver是一个用来远程gdb或lld调试的程序，当一个设备被标记为开发设备，那么这个程序会被安装到/Developer/usr/bin/debugserver路径下</p>
+
+<p>debugserver的调用方式为：</p>
+
+<pre><code>debugserver [&lt;options&gt;] host:&lt;port&gt; [&lt;prog-name&gt; &lt;arg1&gt; &lt;arg2&gt; ...]
+</code></pre>
+
+<p>你可以在Xcode中找到debugserver，比如挂载/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/ DeviceSupport/7.0.3\ (11B508)/DeveloperDiskImage.dmg后，他的路径为：/Volumes/DeveloperDiskImage/usr/bin/debugserver</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/10/14/lldb-debug/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/03/hand-off/">Hand Off初探</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-03T21:42:01+08:00" pubdate data-updated="true">2014-09-03 09:42PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>iOS8的一个新功能是hand off，这个功能可以允许用户在多端继续他的某个任务，比如iPhone上写笔记写了一半，到家后使用iPad，从锁屏或后台打开程序自动导航到记笔记界面，并且可以继续刚才的笔记内容写。</p>
+
+<p><img src="/images/blog/hand_off.png" title="hand off" alt="Alt text" /></p>
+
+<p>Hand off功能要求用户的几个设备有相同的iCloud账号，打开蓝牙。对于开发者，我们的应用必须是在同一个team ID下，程序拥有相同的iCloud container。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/09/03/hand-off/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-02T23:27:32+08:00" pubdate data-updated="true">2014-07-02 11:27PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在写程序时，我们常常会用到从一个字符串找出子串的位置。</p>
+
+<p>比如，在某个句子快速找到某个你感兴趣的词：“csscsdn”中找到csdn</p>
+
+<p>以下是查找算法，注意：下标为1代表第一个位置，以此类推，跟数组不同</p>
+
+<p>一、朴素模式匹配
+朴素模式匹配是从第一个字符开始，依次向后匹配，这里我们假设游标起始点为1</p>
+
+<pre><code>c s s c s d n
+| | ?
+c s d n
+</code></pre>
+
+<p>当i（主串的游标） = 3，j（子串的游标） = 3时，字符出现了不等，于是i回到2，j回到1</p>
+
+<pre><code>c s s c s d n
+  ?
+  c s d n
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/07/02/kmp/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/17/optimize-app-by-analyze-weixin/">分析微信来优化自己的应用</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-17T20:23:04+08:00" pubdate data-updated="true">2014-06-17 08:23PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>文章内容仅供学习交流，如有不妥，请联系我删除：）</p>
+
+<p>用到的工具：Reveal，Charles，Hopper，越狱设备</p>
+
+<p>流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。实时计算的圆角（CALayer的cornerRadius）也会加重GPU的运算，可是我们的程序经常会遇到需要用圆角的情况，所以如何高效的进行圆角显示就变得非常重要。</p>
+
+<p>Stack Overflow上也有一些优化的方案，比如让设计师提供带圆角，内部是透明色的图片；或者直接在服务器生成圆角图片等等。第一种方案不&#8221;优雅&#8221;，并且依然有透明色，第二种方案太死板，并且需服务端的支持。</p>
+
+<p>看到微信的聊天列表页也有头像是圆角，服务号头像是圆形，通讯录又没有圆角，而且滑动也很流畅，很好奇微信是如何实现的，于是打算使用工具分析一下。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/06/17/optimize-app-by-analyze-weixin/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/07/box2d-of-cocos2d/">Cocos2d中的box2d</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-07T07:49:49+08:00" pubdate data-updated="true">2014-05-07 07:49AM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一、准备工作<br />
+引入box2d包，在需要使用box2d的文件中加入box2d的头文件；由于box2d是c++编写的，所以要把引入box2d的所有文件后缀名都改为.mm</p>
+
+<p>二、box2d中的一些重要参数<br />
+1、gravity，重力加速度，同现实世界中的g，向量<br />
+2、shape，形状，形状是有大小的<br />
+3、density，密度<br />
+4、friction，摩擦力<br />
+5、restitution，恢复，此参数用于碰撞，如果两个物体有不同的restitution，box2d总是选择比较大的restitution进行计算<br />
+6、meter，距离单位，灵活定义你的meter，当对象为0.1至10meters的时候，box2d可以很好的处理它们，</p>
+
+<p>三、box2d之hello world<br />
+让我们先创建一个box2d项目。创建好之后运行，每当我们点击屏幕时，会落下一个小方块：</p>
+
+<p><img src="/images/blog/1343575297_7773.png" title="helloworld" alt="Alt text" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/07/box2d-of-cocos2d/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/">Cocos2d中的动画、字体、菜单和声音</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-03T17:49:41+08:00" pubdate data-updated="true">2014-05-03 05:49PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一、Action和Animation。cocos2d提供了格式各样的action和animation</p>
+
+<p>举个例子</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">CCAction</span> <span class="o">*</span><span class="n">moveAction</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCMoveBy</span> <span class="nl">actionWithDuration:</span><span class="mf">2.0f</span> <span class="nl">position:</span><span class="n">ccp</span><span class="p">(</span><span class="mf">200.0f</span><span class="p">,</span><span class="mf">0.0f</span><span class="p">)];</span>
+</span><span class='line'><span class="p">[</span><span class="n">vikingSprite</span> <span class="nl">runAction:</span><span class="n">moveAction</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>假如vikingSprite是我们已经建立好的一个精灵，那么这个精灵就会朝着position的位置移动，两秒后就到指定位置了</p>
+
+<p>一般来讲，精灵的跟动画相关的有CCAction，CCAnimation，CCAnimate三个对象。一般都是先创建CCAnimation对象，通过CCAnimation创建CCAnimate，再通过CCAnimate创建CCAction，最后精灵对象run一下这个action对象，动画就跑起来了</p>
+
+<p>比较常用的几个action有CCRepeatForever，一个无限重复的动作。CCSequence队列执行一个动作，CCSpawn同时执行多个动作，这三个类都是CCAction的子类，多个action可以互相嵌套着用</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/">Cocos2d中比较重要的类</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
+CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～60;<br />2、CCDirectorTypeMainLoop，比上个导演类型稍快，这个类型下使用uikit相关对象效果不好，并且不能自定义刷新率;<br />3、CCDirectorTypeThreadMainLoop，跟上个差不多，这个导演有在一个独立线程中有个timer来控制主线程中的main loop;<br />4、CCDirectorTypeDisplayLink，通过CADisplayLink刷新屏幕，这个类型下可以使用uikit中的对象，在ios3.1以上的版本才能使用这个类型，刷新率可以定为60，30，15每秒</p>
+
+<p>二、CCNode，一个父类，这个父类中包含了对OpenGL ES的操作，对action的展现等等</p>
+
+<p>三、CCScene，场景，CCNode的子类，同一时间CCDirector只能有一个场景，场景持有屏幕上所有的可见对象，是CCLayer的容器</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/22/bo-ke-ban-jia-liao/">博客搬家了</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-22T11:49:47+08:00" pubdate data-updated="true">2014-04-22 11:49AM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近打算把博客搬到这里，主要有两个原因：一方面csdn广告多，样式不能自定义，另一方面看到很多大牛都在这里建博客，于是打算跟一下风，: )</p>
+
+<p>原博客里文章太碎，这次也打算好好整理下，之后陆续整理到这里来，以后也是本着只写精品的原则来。</p>
+
+<p>前段时间刚刚经历过一个多月的封闭开发，每天基本都是早晨9点到晚上12点的节奏。虽然很累，但是收获也不少。其实平时熟悉的节奏很难让自己暴露一些问题，可是在很疲劳并且高度压力之下，某些问题就很有可能出现。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/22/bo-ke-ban-jia-liao/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a> (3)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/suan-fa/'>算法</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  博客内文章均使用 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">知识共享 署名-相同方式共享</a>. 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

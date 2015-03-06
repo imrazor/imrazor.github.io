@@ -1,0 +1,123 @@
+<!doctype html>
+
+<!--
+
+Base on impress.js, https://github.com/bartaz/impress.js, thanks to the author
+感谢作者分享这么好的东西
+
+-->
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>关于我</title>
+    <meta name="author" content="volcan1987">
+    
+    <link href="/stylesheets/about.css" rel="stylesheet" />
+    
+    <link rel="shortcut icon" href="favicon.png" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+</head>
+
+<body class="impress-not-supported">
+
+<div class="fallback-message">
+    <p>您的浏览器 <b>不支持这个页面的效果</b> 所以您看到的是简版</p>
+    <p>为了有更好的体验，您可以下载最新的 <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> 浏览器.</p>
+</div>
+
+<div id="impress">
+	
+    <div id="title" class="step" data-x="-1000" data-y="-1500">
+        <font class="hello">你好</font>，<span> 我 </span>叫<span class="name">冀睿哲</span>
+        <h3>欢迎来到<span> 我 </span>的博客</h3>
+    </div>
+
+    <div id="its" class="step" data-x="1000" data-y="2700" data-rotate="60" data-scale="5">
+        <p>
+        	希望这里的内容可以 <strong>帮到你</strong> <br/>
+					或者为你提供解决问题的 <strong>思路</strong>
+        </p>
+    </div>
+
+    <div id="big" class="step" data-x="4000" data-y="4000" data-rotate="120" data-scale="5">
+        <p>互联网的精神是<strong class="scaling">分享</strong> <div class="thoughts">希望你有好想法也分享给大家</div></p>
+    </div>
+    
+    <div id="forward" class="step" data-x="6000" data-y="6000" data-rotate="180" data-scale="5">
+        <p>这样我们就能共同<strong class="moving">进步</strong></p>
+    </div>
+
+    <div id="tiny" class="step" data-x="6300" data-y="6000" data-z="-3000" data-rotate="360" data-scale="0.5">
+        <p>下面来说说<span> 我 </span>吧</p>
+    </div>
+
+    <div id="ing" class="step" data-x="1800" data-y="-1250" data-rotate="-90" data-scale="6">
+        <p><b class="positioning">原来php，<br /></b><b class="rotating">现主打iOS，</b><b class="scaling">北漂中</b><br />希望能把技术做好</p>
+    </div>
+    
+    <div id="dream" class="step" data-x="3400" data-y="-2250" data-rotate="-80" data-rotate-x="-40" data-rotate-y="10" data-scale="6">
+    		<p>
+        	<strong class="architect">理想：</strong><b class="reality">架构师</b>
+        	<strong class="reality">现实：</strong><b class="architect">中级开发...</b>
+        </p>
+    </div>
+    
+    <div id="same" class="step" data-x="5800" data-y="-500" data-rotate="180" data-rotate-x="60" data-rotate-y="10"  data-scale="4">
+        <p>
+        	如果你跟<span> 我 </span>差不多<br />
+        	就一起<strong> 努力 </strong>吧！
+        </p>
+    </div>
+    
+    <div id="thought" class="step" data-x="8800" data-y="3000" data-rotate="270" data-rotate-x="-40" data-rotate-y="10" data-scale="6">
+        <p>
+        	做技术，必须不断<b> 学习 </b><br />
+        	<strong> 学历 </strong>代表过去<br />
+        	<strong> 能力 </strong>代表现在<br />
+        	<b> 学习力 </b>代表未来	
+        </p>
+    </div>
+    
+    <div id="where" class="step" data-x="6800" data-y="800" data-rotate="0" data-scale="8">
+        <p>
+        	你可以在<strong><a target="_blank" href="http://weibo.com/volcan1987">微博</a></strong>或是<strong><a target="_blank" href="https://github.com/volcan1987">github</a></strong>找到<span> 我 </span>	
+        </p>
+    </div>
+    
+    <div id="share" class="step" data-x="13800" data-y="2000" data-rotate="30" data-z="-2000" data-scale="2">
+        <p>
+        	你都看到这里了？<br />
+        	那分享一段<span> 我 </span>很喜欢的话吧！	
+        </p>
+    </div>
+    
+    <div id="quote" class="step" data-x="11800" data-y="3500" data-rotate="60" data-z="-2000" data-scale="3">
+        <p>
+        	有<strong> 勇气 </strong>改变能改变的<br />
+        	有<strong> 胸怀 </strong>接受不可改变的<br />
+        	有<b> 智慧 </b>分辨两者的不同
+        </p>
+    </div>
+    
+    <div id="overview" class="step" data-x="5000" data-y="1500" data-scale="13">
+    </div>
+
+</div>
+
+<div class="hint">
+    <p>请按空格或方向键来控制</p>
+</div>
+<script>
+if ("ontouchstart" in document.documentElement) {
+    document.querySelector(".hint").innerHTML = "<p>请点击左右两侧来控制</p>";
+}
+</script>
+
+<script src="/javascripts/impress.js"></script>
+<script>impress().init();</script>
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: iOS | Imrazor's Blog]]></title>
+  <link href="http://imrazor.github.io/blog/categories/ios/atom.xml" rel="self"/>
+  <link href="http://imrazor.github.io/"/>
+  <updated>2015-03-06T21:10:13+08:00</updated>
+  <id>http://imrazor.github.io/</id>
+  <author>
+    <name><![CDATA[imrazor]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[使用lldb和Hopper破解Reveal的试用限制]]></title>
+    <link href="http://imrazor.github.io/blog/2014/10/20/use-lldb-and-hopper-break-reveal/"/>
+    <updated>2014-10-20T23:23:53+08:00</updated>
+    <id>http://imrazor.github.io/blog/2014/10/20/use-lldb-and-hopper-break-reveal</id>
+    <content type="html"><![CDATA[<p>本文仅供学习和交流，如有侵权或不妥，请联系我删除</p>
+
+<p>之前写了篇lldb联机调试的文章，恰好Reveal的试用到期了，于是拿来练练手。本文参考了<a href="http://www.yangch.info/?p=1230">&ldquo;[原创]破解Reveal购买提示框&rdquo;</a>，但是去掉了“Free trial has ended” ：），并假设你已经了解了一些lldb的基本调试命令</p>
+
+<p>首先用Hopper分析Reveal源程序，搜索关键字trial，首先发现了IBATrialModeReminderPresenter</p>
+
+<p><img src="/images/blog/2014-10-20/controller_image.png" alt="" /></p>
+
+<p>用lldb调试下，断点在图中内存地址中</p>
+
+<pre><code>(lldb) target create "/Applications/Reveal.app"
+Current executable set to '/Applications/Reveal.app' (x86_64).
+(lldb) b -a 0000000100094180
+Breakpoint 1: address = 0x0000000100094180
+(lldb) r
+Process 4255 launched: '/Applications/Reveal.app/Contents/MacOS/Reveal' (x86_64)
+2014-10-20 19:40:37.548 Reveal[4255:d0b] Unknown class          IBAViewHierarchyCanvasSharingMenu in Interface Builder file at path /Applications/  Reveal.app/Contents/Resources/en.lproj/MainMenu.nib.
+2014-10-20 19:40:37.554 Reveal[4255:d0b]  INFO: Log Level Enabled
+2014-10-20 19:40:37.554 Reveal[4255:d0b]  WARN: Log Level Enabled
+2014-10-20 19:40:37.554 Reveal[4255:d0b] ERROR: Log Level Enabled
+2014-10-20 19:40:37.574 Reveal[4255:d0b]  INFO: Reveal Automatic Updates are    enabled!
+2014-10-20 19:40:37.862 Reveal[4255:d0b] [HockeySDK] WARNING: Detecting crashes is  NOT enabled due to running the app with a debugger attached.
+2014-10-20 19:40:37.863 Reveal[4255:d0b]  INFO: Reveal Crash Reporting is enabled!
+Process 4255 stopped
+* thread #1: tid = 0x3abbf, 0x0000000100094180  Reveal`___lldb_unnamed_function3544$$Reveal, queue = 'com.apple.main-thread', stop reason   = breakpoint 1.1
+    frame #0: 0x0000000100094180 Reveal`___lldb_unnamed_function3544$$Reveal
+Reveal`___lldb_unnamed_function3544$$Reveal:
+-&gt; 0x100094180:  pushq  %rbp
+   0x100094181:  movq   %rsp, %rbp
+   0x100094184:  leaq   0xa05c5(%rip), %rsi       ; { /usr/lib/ libobjc.A.dylib`objc_msgSend_fixedup, "alloc" }
+   0x10009418b:  callq  *0xa05bf(%rip)            ; { /usr/lib/ libobjc.A.dylib`objc_msgSend_fixedup, "alloc" }
+</code></pre>
+
+<!--more-->
+
+
+<p>至此Reveal启动，并进入了断点，si和ni都是一步步调试，直接finish单步跳出，第一次的内存地址100095f96中没什么太有用的信息，但是所在的类是IBATrialModReminderPresenter中，说明我们很进了&hellip;</p>
+
+<pre><code>(lldb) finish
+Process 4255 stopped
+* thread #1: tid = 0x3abbf, 0x0000000100095f96  Reveal`___lldb_unnamed_function3586$$Reveal + 94, queue = 'com.apple.main-thread', stop     reason = step out
+    frame #0: 0x0000000100095f96 Reveal`___lldb_unnamed_function3586$$Reveal + 94
+Reveal`___lldb_unnamed_function3586$$Reveal + 94:
+-&gt; 0x100095f96:  movq   %rbx, %r13
+   0x100095f99:  movq   %rax, %rdi
+   0x100095f9c:  callq  0x1000a0596               ; symbol stub for:    objc_retainAutoreleasedReturnValue
+   0x100095fa1:  movq   0x67400(%rip), %r15       ; (void *)0x00007fff8f6d10d0:     objc_release
+(lldb) finish
+Process 4255 stopped
+* thread #1: tid = 0x3abbf, 0x000000010009614e  Reveal`___lldb_unnamed_function3588$$Reveal + 66, queue = 'com.apple.main-thread', stop     reason = step out
+    frame #0: 0x000000010009614e Reveal`___lldb_unnamed_function3588$$Reveal + 66
+Reveal`___lldb_unnamed_function3588$$Reveal + 66:
+-&gt; 0x10009614e:  movq   %r14, %rdi
+   0x100096151:  popq   %rbx
+   0x100096152:  popq   %r14
+   0x100096154:  popq   %rbp
+</code></pre>
+
+<p>再次finish，查看内存地址10009614e，这次发现了关键方法@selector(shouldShowTrialModeSheet)：</p>
+
+<p><img src="/images/blog/2014-10-20/address.png" alt="" /></p>
+
+<p>不得不感慨老外起的方法名实在是太好了&hellip;进入到shouldShowTrialModeSheet方法中，处理下代码，会看到是这样的：</p>
+
+<p><img src="/images/blog/2014-10-20/code.png" alt="" /></p>
+
+<p>看代码，应该是通过日期进行了各种判断，来检测用户的试用是否过期了，关键变量rax如果要是为true，那么就不会进第一个if中，而rbx的又是0x0，那到最后rax一定会是0x0，也就是NO了，这个函数返回NO，那么启动时，过期提示框必然不会显示了</p>
+
+<p>于是问题的关键集中在rax的第一次赋值，rax = sub_10009403c();搜索此方法并处理，看到是这样的：</p>
+
+<p><img src="/images/blog/2014-10-20/function.png" alt="" /></p>
+
+<p>我的汇编水平可以说是战斗力不到5的渣渣，然是还是看出来cmp这行是判断var_8与0x0是不是相等，那么如果三目运算符是真，rbx必然是0xff，rax也必然是真了。看来，只需要将这行的0x0改成0x1即可</p>
+
+<p>使用UltraEdit在16进制下打开源码，找到对应的位置，即内存地址94060这里，然后查看这行对应的16进制编码：</p>
+
+<p><img src="/images/blog/2014-10-20/intruction.png" alt="" /></p>
+
+<p>找到E8后面的00，改成01，保存后重启Reveal，过期提示就去掉了</p>
+
+<p><img src="/images/blog/2014-10-20/success.png" alt="" /></p>
+
+<p>因为我也是刚用lldb没多久，汇编又比较渣，如有错误，欢迎大家指正</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[使用lldb调试别人的程序]]></title>
+    <link href="http://imrazor.github.io/blog/2014/10/14/lldb-debug/"/>
+    <updated>2014-10-14T23:20:28+08:00</updated>
+    <id>http://imrazor.github.io/blog/2014/10/14/lldb-debug</id>
+    <content type="html"><![CDATA[<p>文章翻译自 <a href="http://www.iphonedevwiki.net/index.php/Debugserver">这里</a></p>
+
+<p>这是一篇粗略的翻译文章，只翻译第二种方法</p>
+
+<p>首先我们需要一台越狱的设备，并且安装好了ssh</p>
+
+<p>debugserver是一个用来远程gdb或lld调试的程序，当一个设备被标记为开发设备，那么这个程序会被安装到/Developer/usr/bin/debugserver路径下</p>
+
+<p>debugserver的调用方式为：</p>
+
+<pre><code>debugserver [&lt;options&gt;] host:&lt;port&gt; [&lt;prog-name&gt; &lt;arg1&gt; &lt;arg2&gt; ...]
+</code></pre>
+
+<p>你可以在Xcode中找到debugserver，比如挂载/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/ DeviceSupport/7.0.3\ (11B508)/DeveloperDiskImage.dmg后，他的路径为：/Volumes/DeveloperDiskImage/usr/bin/debugserver</p>
+
+<!--more-->
+
+
+<p>想要用起来debugserver，必须要对他进行签名，我们可以创建一个这样的plist文件：</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST   1.0//EN" "http://www.apple.com/DTDs/ PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;com.apple.springboard.debugapplications&lt;/key&gt; &lt;true/&gt;
+    &lt;key&gt;run-unsigned-code&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;get-task-allow&lt;/key&gt; &lt;true/&gt; &lt;key&gt;task_for_pid-allow&lt;/key&gt; &lt;true/&gt;
+&lt;/dict&gt; 
+&lt;/plist&gt;
+</code></pre>
+
+<p>然后这样签名：</p>
+
+<pre><code>codesign -s - --entitlements entitlements.plist -f debugserver
+</code></pre>
+
+<p>签名后，将debugserver放回到设备的/Developer/usr/bin/debugserver路径下：</p>
+
+<pre><code>scp debugserver root@x.x.x.x:/Developer/usr/bin/debugserver
+</code></pre>
+
+<p>之后ssh连接设备，在控制台输入：</p>
+
+<pre><code>./debugserver *:1234 -a "YouTube"
+</code></pre>
+
+<p>当你看到如下输出时，签名后的debugserver就安装成功了：</p>
+
+<pre><code>My-iPhone-5S:~ root# ./debugserver *:1234 -a "YouTube"
+debugserver-300.2 for arm64.
+Attaching to process YouTube...
+Spawning general listening thread.
+Spawning kqueue listening thread.
+Listening to port 1234 for a connection from *...
+</code></pre>
+
+<p>远程进行lldb会比较慢，我们可以通过USB调试，USB调试需要用到iPhoneTunnel：</p>
+
+<pre><code>wget http://cgit.sukimashita.com/usbmuxd.git/snapshot/usbmuxd-1.0.8.tar.bz2
+tar xjfv usbmuxd-1.0.8.tar.bz2
+cd usbmuxd-1.0.8/python-client/
+python tcprelay.py -t 1234:1234
+</code></pre>
+
+<p>之后所有与localhost:1234的连接都会重定向到USB设备的1234端口：</p>
+
+<pre><code>(lldb) process connect connect://localhost:1234
+Process 2612 stopped
+* thread #1: tid = 0x30d1e, 0x3ba51a84 libsystem_kernel.dylib`mach_msg_trap + 20,   queue = 'com.apple.main-thread, stop reason = signal SIGSTOP
+    frame #0: 0x3ba51a84 libsystem_kernel.dylib`mach_msg_trap + 20
+libsystem_kernel.dylib`mach_msg_trap + 20:
+-&gt; 0x3ba51a84:  pop    {r4, r5, r6, r8}
+   0x3ba51a88:  bx     lr
+
+libsystem_kernel.dylib`mach_msg_overwrite_trap:
+   0x3ba51a8c:  mov    r12, sp
+   0x3ba51a90:  push   {r4, r5, r6, r8}
+(lldb) po [[UIApplication sharedApplication] delegate]
+&lt;YTAppDelegate: 0x15e635a0&gt;
+</code></pre>
+
+<p>此时为断点状态，在控制台输入c，即可继续</p>
+
+<p>gdb和lldb的对照在 <a href="http://lldb.llvm.org/lldb-gdb.html">这里</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hand Off初探]]></title>
+    <link href="http://imrazor.github.io/blog/2014/09/03/hand-off/"/>
+    <updated>2014-09-03T21:42:01+08:00</updated>
+    <id>http://imrazor.github.io/blog/2014/09/03/hand-off</id>
+    <content type="html"><![CDATA[<p>iOS8的一个新功能是hand off，这个功能可以允许用户在多端继续他的某个任务，比如iPhone上写笔记写了一半，到家后使用iPad，从锁屏或后台打开程序自动导航到记笔记界面，并且可以继续刚才的笔记内容写。</p>
+
+<p><img src="/images/blog/hand_off.png" title="hand off" alt="Alt text" /></p>
+
+<p>Hand off功能要求用户的几个设备有相同的iCloud账号，打开蓝牙。对于开发者，我们的应用必须是在同一个team ID下，程序拥有相同的iCloud container。</p>
+
+<!--more-->
+
+
+<p>Hand off中一个很重要的类就是NSUserActivity，通过这个类的对象，我们可以把A设备当前的活动传给B设备。</p>
+
+<p>这个类有着非常简单易用的API，分别为创建、对流的支持、activity数据及activity的传送。下面的代码就创建了一个NSUserActivity：</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">self</span><span class="p">.</span><span class="n">activity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSUserActivity</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithActivityType:</span><span class="s">@&quot;io.github.volcan1987.test&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">self</span><span class="p">;</span>
+</span><span class='line'><span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">webpageURL</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSURL</span> <span class="nl">URLWithString:</span><span class="s">@&quot;http://www.baidu.com&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">userInfo</span> <span class="o">=</span> <span class="err">@</span><span class="p">{</span><span class="s">@&quot;data&quot;</span><span class="o">:</span><span class="n">textField</span><span class="p">.</span><span class="n">text</span><span class="p">};</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>对象创建好后，让我们调用[self.activity becomeCurrent];的时候，如果另一个设备安装了响应此activity的App，那么另一台设备的锁屏下或是后台就会显示这个程序的图标，否则就会显示safari的图标（因为我们指定了webpageURL）</p>
+
+<p>如果要让App响应对应的activity，需要在AppDelegate里实现如下方法：</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nl">application:</span><span class="p">(</span><span class="n">UIApplication</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="p">)</span><span class="n">application</span>
+</span><span class='line'><span class="nl">continueUserActivity:</span> <span class="p">(</span><span class="n">NSUserActivity</span> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="p">)</span><span class="n">userActivity</span>
+</span><span class='line'> <span class="nl">restorationHandler:</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">^</span><span class="p">)(</span><span class="n">NSArray</span> <span class="o">*</span><span class="p">))</span><span class="n">restorationHandler</span> <span class="p">{</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="kt">BOOL</span> <span class="n">handled</span> <span class="o">=</span> <span class="n">NO</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Extract the payload</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">type</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">activityType</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">title</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">title</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">userInfo</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">userInfo</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Assume the app delegate has a text field to display the activity information</span>
+</span><span class='line'><span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;User activity is of type %@, has title %@, and user info %@&quot;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">restorationHandler</span><span class="p">(</span><span class="err">@</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">rootViewController</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">handled</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="n">handled</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>其中restorationHandler参数中的对象应该实现restoreUserActivityState:这个方法来进行后续的动作，在这里，我的root view controller只是简单的将数据显示出来</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="o">&amp;</span><span class="n">ndash</span><span class="p">;</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nl">restoreUserActivityState:</span><span class="p">(</span><span class="n">NSUserActivity</span> <span class="o">*</span><span class="p">)</span><span class="n">activity</span>
+</span><span class='line'><span class="p">{</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">self</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">activity</span><span class="p">.</span><span class="n">userInfo</span><span class="p">[</span><span class="s">@&quot;data&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>到此，一次完整的activity交互就完成了。通过观察，数据的交互应该是通过蓝牙传输的。本文的demo可以在 <a href="https://github.com/volcan1987/HandOffDemo">这里</a> 找到</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[分析微信来优化自己的应用]]></title>
+    <link href="http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin/"/>
+    <updated>2014-06-17T20:23:04+08:00</updated>
+    <id>http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin</id>
+    <content type="html"><![CDATA[<p>文章内容仅供学习交流，如有不妥，请联系我删除：）</p>
+
+<p>用到的工具：Reveal，Charles，Hopper，越狱设备</p>
+
+<p>流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。实时计算的圆角（CALayer的cornerRadius）也会加重GPU的运算，可是我们的程序经常会遇到需要用圆角的情况，所以如何高效的进行圆角显示就变得非常重要。</p>
+
+<p>Stack Overflow上也有一些优化的方案，比如让设计师提供带圆角，内部是透明色的图片；或者直接在服务器生成圆角图片等等。第一种方案不"优雅"，并且依然有透明色，第二种方案太死板，并且需服务端的支持。</p>
+
+<p>看到微信的聊天列表页也有头像是圆角，服务号头像是圆形，通讯录又没有圆角，而且滑动也很流畅，很好奇微信是如何实现的，于是打算使用工具分析一下。</p>
+
+<!--more-->
+
+
+<p>首先在越狱设备上安装微信，将Reveal的framework和dylib分别copy到越狱机的:/System/Library/Frameworks和:/Library/MobileSubstrate/DynamicLibrarie下，重启设备。之后可以看到微信的布局了</p>
+
+<p><img src="/images/blog/2014-6-17/reveal.png" title="weixin_layout" alt="Alt text" /></p>
+
+<p>通过Reveal我们看到微信头像是通过一个叫MainFrameHeadView展示的，那让我们看一下MainFrameHeadView大概是如何实现的，将微信的二进制文件拖到Hopper中，等待分析完成。</p>
+
+<p>分析完成后，搜索MainFrameHeadView</p>
+
+<p><img src="/images/blog/2014-6-17/hopper.png" title="weixin_xxview" alt="Alt text" /></p>
+
+<p>在这个类的代码段中，发现关键字CHeadImageMgr的getRoundImage:size:conerSize:forSence:方法，看其方法名就大概猜到是其对图片进行了圆角处理、或者是获取经过圆角处理的图片了。继续搜索CHeadImageMgr</p>
+
+<p><img src="/images/blog/2014-6-17/c_head_m.png" title="weixin_cheadm" alt="Alt text" /></p>
+
+<p>看到此类基本就是对头像进行了各种各样的处理。通过Charles抓包，发现圆形头像实际是服务器生成好的</p>
+
+<p><img src="/images/blog/2014-6-17/charles.png" title="weixin_circle" alt="Alt text" /></p>
+
+<p>至此，我们大概知道，微信中对话列表的用户头像圆角是本地生成的。原始头像下载好后，很可能立刻进行图片处理，保留不带圆角和带圆角的头像并进行本地持久化。以后圆角头像如果再次用到，就先走内存缓存，内存没有检查本地，本地没有再从网络获取（类似SDWebImage，只不过多了一步下载完成后进行了图片处理）。</p>
+
+<p>本地缓存的圆角图片，跟背景颜色相同的UILabel，再加上不复杂的UI逻辑，你的UITableView也能像微信的对话列表一样流畅。</p>
+]]></content>
+  </entry>
+  
+</feed>

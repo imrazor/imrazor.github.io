@@ -1,0 +1,921 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Cocos2d中的box2d - Imrazor's Blog</title>
+  <meta name="author" content="imrazor">
+
+  
+  <meta name="description" content="一、准备工作
+引入box2d包，在需要使用box2d的文件中加入box2d的头文件；由于box2d是c++编写的，所以要把引入box2d的所有文件后缀名都改为.mm 二、box2d中的一些重要参数
+1、gravity，重力加速度，同现实世界中的g，向量
+2、shape，形状，形状是有大小的
+3、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://imrazor.github.io/blog/2014/05/07/box2d-of-cocos2d">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <meta name="google-site-verification" content="Gp52qtiSPK2bGlO9wzesss5gmlgD34wb05rGOHuJtNY" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Imrazor's Blog</a></h1>
+  
+    <h2>Stay Hungry, Stay Foolish</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:imrazor.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a target="_blank" href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Cocos2d中的box2d</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-07T07:49:49+08:00" pubdate data-updated="true">2014-05-07 07:49AM</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>一、准备工作<br />
+引入box2d包，在需要使用box2d的文件中加入box2d的头文件；由于box2d是c++编写的，所以要把引入box2d的所有文件后缀名都改为.mm</p>
+
+<p>二、box2d中的一些重要参数<br />
+1、gravity，重力加速度，同现实世界中的g，向量<br />
+2、shape，形状，形状是有大小的<br />
+3、density，密度<br />
+4、friction，摩擦力<br />
+5、restitution，恢复，此参数用于碰撞，如果两个物体有不同的restitution，box2d总是选择比较大的restitution进行计算<br />
+6、meter，距离单位，灵活定义你的meter，当对象为0.1至10meters的时候，box2d可以很好的处理它们，</p>
+
+<p>三、box2d之hello world<br />
+让我们先创建一个box2d项目。创建好之后运行，每当我们点击屏幕时，会落下一个小方块：</p>
+
+<p><img src="/images/blog/1343575297_7773.png" title="helloworld" alt="Alt text" /></p>
+
+<!--more-->
+
+
+<p>我们来详细看下生成的代码:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span> <span class="nf">init</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">// always call &quot;super&quot; init</span>
+</span><span class='line'>  <span class="c1">// Apple recommends to re-assign &quot;self&quot; with the &quot;super&quot; return value</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">self</span><span class="o">=</span><span class="p">[</span><span class="n">super</span> <span class="n">init</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// enable touches</span>
+</span><span class='line'>      <span class="n">self</span><span class="p">.</span><span class="n">isTouchEnabled</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// enable accelerometer</span>
+</span><span class='line'>      <span class="n">self</span><span class="p">.</span><span class="n">isAccelerometerEnabled</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">CGSize</span> <span class="n">screenSize</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCDirector</span> <span class="n">sharedDirector</span><span class="p">].</span><span class="n">winSize</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">CCLOG</span><span class="p">(</span><span class="s">@&quot;Screen width %0.2f screen height %0.2f&quot;</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Define the gravity vector.</span>
+</span><span class='line'>      <span class="n">b2Vec2</span> <span class="n">gravity</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">gravity</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="o">-</span><span class="mf">10.0f</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Do we want to let bodies sleep?</span>
+</span><span class='line'>      <span class="c1">// This will speed up the physics simulation</span>
+</span><span class='line'>      <span class="n">bool</span> <span class="n">doSleep</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Construct a world object, which will hold and simulate the rigid bodies.</span>
+</span><span class='line'>      <span class="n">world</span> <span class="o">=</span> <span class="n">new</span> <span class="n">b2World</span><span class="p">(</span><span class="n">gravity</span><span class="p">,</span> <span class="n">doSleep</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">world</span><span class="o">-&gt;</span><span class="n">SetContinuousPhysics</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Debug Draw functions</span>
+</span><span class='line'>      <span class="n">m_debugDraw</span> <span class="o">=</span> <span class="n">new</span> <span class="n">GLESDebugDraw</span><span class="p">(</span> <span class="n">PTM_RATIO</span> <span class="p">);</span>
+</span><span class='line'>      <span class="n">world</span><span class="o">-&gt;</span><span class="n">SetDebugDraw</span><span class="p">(</span><span class="n">m_debugDraw</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">uint32</span> <span class="n">flags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">flags</span> <span class="o">+=</span> <span class="n">b2DebugDraw</span><span class="o">::</span><span class="n">e_shapeBit</span><span class="p">;</span>
+</span><span class='line'><span class="c1">//       flags += b2DebugDraw::e_jointBit;</span>
+</span><span class='line'><span class="c1">//       flags += b2DebugDraw::e_aabbBit;</span>
+</span><span class='line'><span class="c1">//       flags += b2DebugDraw::e_pairBit;</span>
+</span><span class='line'><span class="c1">//       flags += b2DebugDraw::e_centerOfMassBit;</span>
+</span><span class='line'>      <span class="n">m_debugDraw</span><span class="o">-&gt;</span><span class="n">SetFlags</span><span class="p">(</span><span class="n">flags</span><span class="p">);</span>      
+</span><span class='line'>      
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Define the ground body.</span>
+</span><span class='line'>      <span class="n">b2BodyDef</span> <span class="n">groundBodyDef</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">groundBodyDef</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// bottom-left corner</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Call the body factory which allocates memory for the ground body</span>
+</span><span class='line'>      <span class="c1">// from a pool and creates the ground box shape (also from a pool).</span>
+</span><span class='line'>      <span class="c1">// The body is also added to the world.</span>
+</span><span class='line'>      <span class="n">b2Body</span><span class="o">*</span> <span class="n">groundBody</span> <span class="o">=</span> <span class="n">world</span><span class="o">-&gt;</span><span class="n">CreateBody</span><span class="p">(</span><span class="o">&amp;</span><span class="n">groundBodyDef</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// Define the ground box shape.</span>
+</span><span class='line'>      <span class="n">b2PolygonShape</span> <span class="n">groundBox</span><span class="p">;</span>      
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// bottom</span>
+</span><span class='line'>      <span class="n">groundBox</span><span class="p">.</span><span class="n">SetAsEdge</span><span class="p">(</span><span class="n">b2Vec2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span><span class="mi">0</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">groundBody</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">groundBox</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// top</span>
+</span><span class='line'>      <span class="n">groundBox</span><span class="p">.</span><span class="n">SetAsEdge</span><span class="p">(</span><span class="n">b2Vec2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">),</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">groundBody</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">groundBox</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// left</span>
+</span><span class='line'>      <span class="n">groundBox</span><span class="p">.</span><span class="n">SetAsEdge</span><span class="p">(</span><span class="n">b2Vec2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">),</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">groundBody</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">groundBox</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">// right</span>
+</span><span class='line'>      <span class="n">groundBox</span><span class="p">.</span><span class="n">SetAsEdge</span><span class="p">(</span><span class="n">b2Vec2</span><span class="p">(</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span><span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">),</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span><span class="mi">0</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">groundBody</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">groundBox</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      
+</span><span class='line'>      <span class="c1">//Set up sprite</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">CCSpriteBatchNode</span> <span class="o">*</span><span class="n">batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCSpriteBatchNode</span> <span class="nl">batchNodeWithFile:</span><span class="s">@&quot;blocks.png&quot;</span> <span class="nl">capacity:</span><span class="mi">150</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">self</span> <span class="nl">addChild:</span><span class="n">batch</span> <span class="nl">z:</span><span class="mi">0</span> <span class="nl">tag:</span><span class="n">kTagBatchNode</span><span class="p">];</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="p">[</span><span class="n">self</span> <span class="nl">addNewSpriteWithCoords:</span><span class="n">ccp</span><span class="p">(</span><span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">)];</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">CCLabelTTF</span> <span class="o">*</span><span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCLabelTTF</span> <span class="nl">labelWithString:</span><span class="s">@&quot;Tap screen&quot;</span> <span class="nl">fontName:</span><span class="s">@&quot;Marker Felt&quot;</span> <span class="nl">fontSize:</span><span class="mi">32</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">self</span> <span class="nl">addChild:</span><span class="n">label</span> <span class="nl">z:</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">[</span><span class="n">label</span> <span class="nl">setColor:</span><span class="n">ccc3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)];</span>
+</span><span class='line'>      <span class="n">label</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">ccp</span><span class="p">(</span> <span class="n">screenSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">screenSize</span><span class="p">.</span><span class="n">height</span><span class="o">-</span><span class="mi">50</span><span class="p">);</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="p">[</span><span class="n">self</span> <span class="nl">schedule:</span> <span class="k">@selector</span><span class="p">(</span><span class="nl">tick:</span><span class="p">)];</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">self</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在init方法中，首先创建了重力加速度，加速度是一个向量，-10是因为加速度朝向y轴负方向。之后创建world以及word的四个边缘，防止物体跑出屏幕。再然后是创建精和一个label，然后schedule tick方法</p>
+
+<p>创建body的步骤：<br />
+<img src="/images/blog/1343576373_9748.jpg" title="body" alt="Alt text" /></p>
+
+<p>创建fixture的步骤：<br />
+<img src="/images/blog/1343577197_1013.jpg" title="fixture" alt="Alt text" /></p>
+
+<p>下面，让我们来看看如何创建一个box2d世界中的物体：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nf">addNewSpriteWithCoords:</span><span class="p">(</span><span class="n">CGPoint</span><span class="p">)</span><span class="nv">p</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">CCLOG</span><span class="p">(</span><span class="s">@&quot;Add sprite %0.2f x %02.f&quot;</span><span class="p">,</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">CCSpriteBatchNode</span> <span class="o">*</span><span class="n">batch</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCSpriteBatchNode</span><span class="o">*</span><span class="p">)</span> <span class="p">[</span><span class="n">self</span> <span class="nl">getChildByTag:</span><span class="n">kTagBatchNode</span><span class="p">];</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is</span>
+</span><span class='line'>  <span class="c1">//just randomly picking one of the images</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCRANDOM_0_1</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">.5</span> <span class="o">?</span> <span class="mi">0</span><span class="o">:</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">idy</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCRANDOM_0_1</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">.5</span> <span class="o">?</span> <span class="mi">0</span><span class="o">:</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">CCSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCSprite</span> <span class="nl">spriteWithBatchNode:</span><span class="n">batch</span> <span class="nl">rect:</span><span class="n">CGRectMake</span><span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="n">idx</span><span class="p">,</span><span class="mi">32</span> <span class="o">*</span> <span class="n">idy</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p">)];</span>
+</span><span class='line'>  <span class="p">[</span><span class="n">batch</span> <span class="nl">addChild:</span><span class="n">sprite</span><span class="p">];</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">sprite</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">ccp</span><span class="p">(</span> <span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// Define the dynamic body.</span>
+</span><span class='line'>  <span class="c1">//Set up a 1m squared box in the physics world</span>
+</span><span class='line'>  <span class="n">b2BodyDef</span> <span class="n">bodyDef</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">bodyDef</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">b2_dynamicBody</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">bodyDef</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">bodyDef</span><span class="p">.</span><span class="n">userData</span> <span class="o">=</span> <span class="n">sprite</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">b2Body</span> <span class="o">*</span><span class="n">body</span> <span class="o">=</span> <span class="n">world</span><span class="o">-&gt;</span><span class="n">CreateBody</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bodyDef</span><span class="p">);</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// Define another box shape for our dynamic body.</span>
+</span><span class='line'>  <span class="n">b2PolygonShape</span> <span class="n">dynamicBox</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">dynamicBox</span><span class="p">.</span><span class="n">SetAsBox</span><span class="p">(</span><span class="mf">.5f</span><span class="p">,</span> <span class="mf">.5f</span><span class="p">);</span><span class="c1">//These are mid points for our 1m box</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// Define the dynamic body fixture.</span>
+</span><span class='line'>  <span class="n">b2FixtureDef</span> <span class="n">fixtureDef</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">fixtureDef</span><span class="p">.</span><span class="n">shape</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">dynamicBox</span><span class="p">;</span>    
+</span><span class='line'>  <span class="n">fixtureDef</span><span class="p">.</span><span class="n">density</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">fixtureDef</span><span class="p">.</span><span class="n">friction</span> <span class="o">=</span> <span class="mf">0.3f</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">body</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fixtureDef</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到，代码中的步骤跟我们上面的步骤一样，唯一不同的就是多了一个userData，这个属性用来绑定精灵，否则你会看到精灵在你点击的地方不动，而一个粉色的方块掉了下去。fixture是相对于body的位置来的</p>
+
+<p>接下来是tick方法:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="nf">tick:</span> <span class="p">(</span><span class="n">ccTime</span><span class="p">)</span> <span class="n">dt</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">//It is recommended that a fixed time step is used with Box2D for stability</span>
+</span><span class='line'>  <span class="c1">//of the simulation, however, we are using a variable time step here.</span>
+</span><span class='line'>  <span class="c1">//You need to make an informed choice, the following URL is useful</span>
+</span><span class='line'>  <span class="c1">//http://gafferongames.com/game-physics/fix-your-timestep/</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">int32</span> <span class="n">velocityIterations</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">int32</span> <span class="n">positionIterations</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// Instruct the world to perform a single step of simulation. It is</span>
+</span><span class='line'>  <span class="c1">// generally best to keep the time step and iterations fixed.</span>
+</span><span class='line'>  <span class="n">world</span><span class="o">-&gt;</span><span class="n">Step</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">velocityIterations</span><span class="p">,</span> <span class="n">positionIterations</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//Iterate over the bodies in the physics world</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="n">b2Body</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="n">world</span><span class="o">-&gt;</span><span class="n">GetBodyList</span><span class="p">();</span> <span class="n">b</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">GetNext</span><span class="p">())</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">GetUserData</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="c1">//Synchronize the AtlasSprites position and rotation with the corresponding body</span>
+</span><span class='line'>          <span class="n">CCSprite</span> <span class="o">*</span><span class="n">myActor</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCSprite</span><span class="o">*</span><span class="p">)</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">GetUserData</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">myActor</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">GetPosition</span><span class="p">().</span><span class="n">x</span> <span class="o">*</span> <span class="n">PTM_RATIO</span><span class="p">,</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">GetPosition</span><span class="p">().</span><span class="n">y</span> <span class="o">*</span> <span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">myActor</span><span class="p">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">CC_RADIANS_TO_DEGREES</span><span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">GetAngle</span><span class="p">());</span>
+</span><span class='line'>      <span class="p">}</span>    
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Step方法中，velocityIterations和positionIterations这两个参数越大，box2d就能进行更好的模拟，但是性能就会下降，这两个参数你应该自己把握以适合你的游戏。<br />
+后面的for循环是为了让你的sprite与box2d中的对象同步，如果注释掉这段代码，你会发现粉方块掉下去了，你的sprite没掉下去。</p>
+
+<p>四、box2d中拖动一个物体<br />
+拖移物体需要用到box2d中的b2MouseJoint，首先我们在touchbegan方法中为我们点击到的物体创建b2MouseJoint对象，那么问题来了，我们如何获取点击到的物体呢？</p>
+
+<p>box2d为我们提供了相关方法，即AABB（axis-aligned bounding box），原理为：首先，我们点击位置的四边加上了1-point的边，这样我们点击的位置变成了一个小方块；之后，以某个形状的物体做个长方形，看看我们点击的位置是否在这个长方形里面。如图：</p>
+
+<p><img src="/images/blog/1343750595_4571.jpg" title="aabb" alt="Alt text" /></p>
+
+<p>如果我们点击的位置在这个长方形里面，那么调用callback对象，这个callback对象是我们自己写的，之后可以通过TestPoint看看点击的位置是否的确在AABB找出的物体上，如果在，那么我们就获取到了点击的物体。上图可以发现其实我们并没有点到那个黑色的物体上，所以TestPoint会返回false。如果同时点到了多个物体，只返回第一个被发现的。</p>
+
+<p>下面是touch began代码，我们可以看到b2MouseJoint如何被创建的：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">ccTouchesBegan:</span><span class="p">(</span><span class="n">NSSet</span> <span class="o">*</span><span class="p">)</span><span class="nv">touches</span> <span class="nf">withEvent:</span><span class="p">(</span><span class="n">UIEvent</span> <span class="o">*</span><span class="p">)</span><span class="nv">event</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span><span class="p">(</span> <span class="n">UITouch</span> <span class="o">*</span><span class="n">touch</span> <span class="k">in</span> <span class="n">touches</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">CGPoint</span> <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">touch</span> <span class="nl">locationInView:</span><span class="n">touch</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">location</span> <span class="o">=</span> <span class="p">[[</span><span class="n">CCDirector</span> <span class="n">sharedDirector</span><span class="p">]</span> <span class="nl">convertToGL:</span><span class="n">location</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertToNodeSpace:</span><span class="n">location</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">b2Vec2</span> <span class="n">b2Location</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">location</span><span class="p">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">,</span> <span class="n">location</span><span class="p">.</span><span class="n">y</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">b2AABB</span> <span class="n">aabb</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">b2Vec2</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">aabb</span><span class="p">.</span><span class="n">upperBound</span> <span class="o">=</span> <span class="n">b2Location</span> <span class="o">+</span> <span class="n">delta</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">aabb</span><span class="p">.</span><span class="n">lowerBound</span> <span class="o">=</span> <span class="n">b2Location</span> <span class="o">-</span> <span class="n">delta</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">SimpleQueryCallback</span> <span class="n">callback</span><span class="p">(</span><span class="n">b2Location</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">world</span><span class="o">-&gt;</span><span class="n">QueryAABB</span><span class="p">(</span><span class="o">&amp;</span><span class="n">callback</span><span class="p">,</span> <span class="n">aabb</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">callback</span><span class="p">.</span><span class="n">fixtureFound</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">b2Body</span> <span class="o">*</span><span class="n">body</span> <span class="o">=</span> <span class="n">callback</span><span class="p">.</span><span class="n">fixtureFound</span><span class="o">-&gt;</span><span class="n">GetBody</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">CCSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCSprite</span> <span class="o">*</span><span class="p">)</span><span class="n">body</span><span class="o">-&gt;</span><span class="n">GetUserData</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">==</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="n">b2MouseJointDef</span> <span class="n">mouseJointDef</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">mouseJointDef</span><span class="p">.</span><span class="n">bodyA</span> <span class="o">=</span> <span class="n">groundBody</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">mouseJointDef</span><span class="p">.</span><span class="n">bodyB</span> <span class="o">=</span> <span class="n">body</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">mouseJointDef</span><span class="p">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">b2Location</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">mouseJointDef</span><span class="p">.</span><span class="n">maxForce</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">body</span><span class="o">-&gt;</span><span class="n">GetMass</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">mouseJointDef</span><span class="p">.</span><span class="n">collideConnected</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">mouseJoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">b2MouseJoint</span> <span class="o">*</span><span class="p">)</span> <span class="n">world</span><span class="o">-&gt;</span><span class="n">CreateJoint</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mouseJointDef</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">body</span><span class="o">-&gt;</span><span class="n">SetAwake</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">self</span> <span class="nl">addNewSpriteWithCoords:</span> <span class="n">location</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中bodyA一般会指定固定的body，bodyB指定你想移动的body，target为你要移动到哪里，maxForce越大，拖动速度越快，collideConnected为true时bodyA和bodyB会相撞。</p>
+
+<p>SimpleQueryCallback是我们自己写的一个类：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">class</span> <span class="n">SimpleQueryCallback</span> <span class="o">:</span> <span class="n">public</span> <span class="n">b2QueryCallback</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="nl">public:</span>
+</span><span class='line'>    <span class="n">b2Vec2</span> <span class="n">pointToTest</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">b2Fixture</span> <span class="o">*</span> <span class="n">fixtureFound</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">SimpleQueryCallback</span><span class="p">(</span><span class="k">const</span> <span class="n">b2Vec2</span><span class="o">&amp;</span> <span class="n">point</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">pointToTest</span> <span class="o">=</span> <span class="n">point</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fixtureFound</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">bool</span> <span class="n">ReportFixture</span><span class="p">(</span><span class="n">b2Fixture</span><span class="o">*</span> <span class="n">fixture</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">b2Body</span><span class="o">*</span> <span class="n">body</span> <span class="o">=</span> <span class="n">fixture</span><span class="o">-&gt;</span><span class="n">GetBody</span><span class="p">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">body</span><span class="o">-&gt;</span><span class="n">GetType</span><span class="p">()</span> <span class="o">==</span> <span class="n">b2_dynamicBody</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">fixture</span><span class="o">-&gt;</span><span class="n">TestPoint</span><span class="p">(</span><span class="n">pointToTest</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">fixtureFound</span> <span class="o">=</span> <span class="n">fixture</span><span class="p">;</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">false</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">true</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后是move和touch ended的代码，move中setTarget即会使物体移到新位置，别忘了在touch ended中销毁这个mouseJoint：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">ccTouchesMoved:</span><span class="p">(</span><span class="n">NSSet</span> <span class="o">*</span><span class="p">)</span><span class="nv">touches</span> <span class="nf">withEvent:</span><span class="p">(</span><span class="n">UIEvent</span> <span class="o">*</span><span class="p">)</span><span class="nv">event</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span><span class="p">(</span> <span class="n">UITouch</span> <span class="o">*</span><span class="n">touch</span> <span class="k">in</span> <span class="n">touches</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">CGPoint</span> <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">touch</span> <span class="nl">locationInView:</span><span class="n">touch</span><span class="p">.</span><span class="n">view</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">location</span> <span class="o">=</span> <span class="p">[[</span><span class="n">CCDirector</span> <span class="n">sharedDirector</span><span class="p">]</span> <span class="nl">convertToGL:</span><span class="n">location</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">self</span> <span class="nl">convertToNodeSpace:</span><span class="n">location</span><span class="p">];</span>
+</span><span class='line'>        <span class="n">b2Vec2</span> <span class="n">b2Location</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">location</span><span class="p">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">,</span> <span class="n">location</span><span class="p">.</span><span class="n">y</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">mouseJoint</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">mouseJoint</span><span class="o">-&gt;</span><span class="n">SetTarget</span><span class="p">(</span><span class="n">b2Location</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">ccTouchesEnded:</span><span class="p">(</span><span class="n">NSSet</span> <span class="o">*</span><span class="p">)</span><span class="nv">touches</span> <span class="nf">withEvent:</span><span class="p">(</span><span class="n">UIEvent</span> <span class="o">*</span><span class="p">)</span><span class="nv">event</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">//Add a new body/atlas sprite at the touched location</span>
+</span><span class='line'>  <span class="k">for</span><span class="p">(</span> <span class="n">UITouch</span> <span class="o">*</span><span class="n">touch</span> <span class="k">in</span> <span class="n">touches</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">CGPoint</span> <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">touch</span> <span class="nl">locationInView:</span> <span class="p">[</span><span class="n">touch</span> <span class="n">view</span><span class="p">]];</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">location</span> <span class="o">=</span> <span class="p">[[</span><span class="n">CCDirector</span> <span class="n">sharedDirector</span><span class="p">]</span> <span class="nl">convertToGL:</span> <span class="n">location</span><span class="p">];</span>
+</span><span class='line'>      
+</span><span class='line'><span class="c1">//       [self addNewSpriteWithCoords: location];</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">mouseJoint</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">world</span><span class="o">-&gt;</span><span class="n">DestroyJoint</span><span class="p">(</span><span class="n">mouseJoint</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">mouseJoint</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>五、box2d中的sensor<br />
+sensor可以用在我们的人物来到特定的位置触发一些事件，它的创建跟其他刚体的创建一样，只是将b2FixtureDef的isSensor设为true</p>
+
+<p>sensor可以这么创建：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">createSensor</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">CGSize</span> <span class="n">winSize</span> <span class="o">=</span> <span class="p">[[</span><span class="n">CCDirector</span> <span class="n">sharedDirector</span><span class="p">]</span> <span class="n">winSize</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">CGSize</span> <span class="n">sensorSize</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">b2BodyDef</span> <span class="n">bodyDef</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">bodyDef</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">b2_staticBody</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">bodyDef</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">((</span><span class="n">winSize</span><span class="p">.</span><span class="n">width</span><span class="o">-</span><span class="n">sensorSize</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">,</span>
+</span><span class='line'>                              <span class="p">(</span><span class="n">sensorSize</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">sensorBody</span> <span class="o">=</span> <span class="n">world</span><span class="o">-&gt;</span><span class="n">CreateBody</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bodyDef</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">b2PolygonShape</span> <span class="n">shape</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">shape</span><span class="p">.</span><span class="n">SetAsBox</span><span class="p">(</span><span class="n">sensorSize</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">,</span> <span class="n">sensorSize</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="n">PTM_RATIO</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">b2FixtureDef</span> <span class="n">fixtureDef</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">fixtureDef</span><span class="p">.</span><span class="n">shape</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">shape</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">fixtureDef</span><span class="p">.</span><span class="n">isSensor</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sensorBody</span><span class="o">-&gt;</span><span class="n">CreateFixture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fixtureDef</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>运行后，绿色区域就是我们的sensor：
+<img src="/images/blog/1343832334_6742.png" title="sensor" alt="Alt text" /></p>
+
+<p>我们可以看到sensor是可以让刚体穿过的。下面在update里加入如下代码：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">b2ContactEdge</span><span class="o">*</span> <span class="n">edge</span> <span class="o">=</span> <span class="n">sensorBody</span><span class="o">-&gt;</span><span class="n">GetContactList</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">b2Contact</span><span class="o">*</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">edge</span><span class="o">-&gt;</span><span class="n">contact</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">b2Fixture</span><span class="o">*</span> <span class="n">fixtureB</span> <span class="o">=</span> <span class="n">contact</span><span class="o">-&gt;</span><span class="n">GetFixtureB</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">b2Body</span> <span class="o">*</span><span class="n">bodyB</span> <span class="o">=</span> <span class="n">fixtureB</span><span class="o">-&gt;</span><span class="n">GetBody</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">bodyB</span> <span class="o">!=</span> <span class="n">sensorBody</span> <span class="o">&amp;&amp;</span> <span class="n">bodyB</span> <span class="o">!=</span> <span class="n">groundBody</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">CCSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="p">(</span><span class="n">CCSprite</span> <span class="o">*</span><span class="p">)</span><span class="n">bodyB</span><span class="o">-&gt;</span><span class="n">GetUserData</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">[</span><span class="n">sprite</span> <span class="nl">removeFromParentAndCleanup:</span><span class="n">YES</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">world</span><span class="o">-&gt;</span><span class="n">DestroyBody</span><span class="p">(</span><span class="n">bodyB</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">bodyB</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="n">edge</span> <span class="o">=</span> <span class="n">edge</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这时候，我们在sensor上方点击创建出来的物体，掉到sensor上立马就消失了。注意，这里的检测会有一个问题，假如某个物体移动很快，update方法前在sensor这边，第二次update有可能穿出sensor而未被检测到。</p>
+
+<p>六、创建一个不规则的shape<br />
+box2d中你可以为一个shape设置多个vertex，这样你就可能生成一个自定义的shape，比如：</p>
+
+<p><img src="/images/blog/1344141723_1283.png" title="shape" alt="Alt text" /></p>
+
+<p>这样，一个自定义的shape就创建好了。创建自定义shape有几点需要注意：<br />
+1、顶点的位置是相对于body中心的<br />
+2、顶点需要顺时针定义<br />
+3、最大顶点数量不能超过8，数量越大，越费内存，性能也越差<br />
+4、顶点无法定义一个凹面体（concave）</p>
+
+<p>下图显示了什么是concave和convex：</p>
+
+<p><img src="/images/blog/1344142121_9899.png" title="concave and convex" alt="Alt text" /></p>
+
+<p>有一个小工具用于获取顶点的值，叫vertex helper，下载地址：<a href="https://github.com/jfahrenkrug/VertexHelper">https://github.com/jfahrenkrug/VertexHelper</a><br />
+打开小工具后，首先把你的图片拖到vertex helper中，点击edit mode，type选择box2d，style选择initialization，用鼠标在图上点击即可：</p>
+
+<p><img src="/images/blog/1344145342_2179.png" title="vertex helper" alt="Alt text" /></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">imrazor</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-07T07:49:49+08:00" pubdate data-updated="true">2014-05-07 07:49AM</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <div class="jiathis_style"><span class="jiathis_txt">分享到：</span>
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_fav"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share?uid=1925048" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+  </div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1925048" charset="utf-8"></script>
+  
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/" title="Previous Post: cocos2d中的动画、字体、菜单和声音">&laquo; cocos2d中的动画、字体、菜单和声音</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/17/optimize-app-by-analyze-weixin/" title="Next Post: 分析微信来优化自己的应用">分析微信来优化自己的应用 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/05/07/box2d-of-cocos2d" data-title="cocos2d中的box2d" data-url="http://imrazor.github.io/blog/2014/05/07/box2d-of-cocos2d/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"volcan1987"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a> (3)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/suan-fa/'>算法</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  博客内文章均使用 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">知识共享 署名-相同方式共享</a>. 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

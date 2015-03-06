@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Hand Off初探 - Imrazor's Blog</title>
+  <meta name="author" content="imrazor">
+
+  
+  <meta name="description" content="iOS8的一个新功能是hand off，这个功能可以允许用户在多端继续他的某个任务，比如iPhone上写笔记写了一半，到家后使用iPad，从锁屏或后台打开程序自动导航到记笔记界面，并且可以继续刚才的笔记内容写。 Hand off功能要求用户的几个设备有相同的iCloud账号，打开蓝牙。对于开发者， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://imrazor.github.io/blog/2014/09/03/hand-off">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <meta name="google-site-verification" content="Gp52qtiSPK2bGlO9wzesss5gmlgD34wb05rGOHuJtNY" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Imrazor's Blog</a></h1>
+  
+    <h2>Stay Hungry, Stay Foolish</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:imrazor.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a target="_blank" href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Hand Off初探</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-03T21:42:01+08:00" pubdate data-updated="true">2014-09-03 09:42PM</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>iOS8的一个新功能是hand off，这个功能可以允许用户在多端继续他的某个任务，比如iPhone上写笔记写了一半，到家后使用iPad，从锁屏或后台打开程序自动导航到记笔记界面，并且可以继续刚才的笔记内容写。</p>
+
+<p><img src="/images/blog/hand_off.png" title="hand off" alt="Alt text" /></p>
+
+<p>Hand off功能要求用户的几个设备有相同的iCloud账号，打开蓝牙。对于开发者，我们的应用必须是在同一个team ID下，程序拥有相同的iCloud container。</p>
+
+<!--more-->
+
+
+<p>Hand off中一个很重要的类就是NSUserActivity，通过这个类的对象，我们可以把A设备当前的活动传给B设备。</p>
+
+<p>这个类有着非常简单易用的API，分别为创建、对流的支持、activity数据及activity的传送。下面的代码就创建了一个NSUserActivity：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">activity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSUserActivity</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithActivityType:</span><span class="s">@&quot;io.github.volcan1987.test&quot;</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">self</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">webpageURL</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSURL</span> <span class="nl">URLWithString:</span><span class="s">@&quot;http://www.baidu.com&quot;</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">activity</span><span class="p">.</span><span class="n">userInfo</span> <span class="o">=</span> <span class="err">@</span><span class="p">{</span><span class="s">@&quot;data&quot;</span><span class="o">:</span><span class="n">textField</span><span class="p">.</span><span class="n">text</span><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对象创建好后，让我们调用[self.activity becomeCurrent];的时候，如果另一个设备安装了响应此activity的App，那么另一台设备的锁屏下或是后台就会显示这个程序的图标，否则就会显示safari的图标（因为我们指定了webpageURL）</p>
+
+<p>如果要让App响应对应的activity，需要在AppDelegate里实现如下方法：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">application:</span><span class="p">(</span><span class="n">UIApplication</span> <span class="o">*</span><span class="p">)</span><span class="nv">application</span>
+</span><span class='line'><span class="nf">continueUserActivity:</span> <span class="p">(</span><span class="n">NSUserActivity</span> <span class="o">*</span><span class="p">)</span><span class="nv">userActivity</span>
+</span><span class='line'> <span class="nf">restorationHandler:</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">^</span><span class="p">)(</span><span class="n">NSArray</span> <span class="o">*</span><span class="p">))</span><span class="nv">restorationHandler</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">BOOL</span> <span class="n">handled</span> <span class="o">=</span> <span class="n">NO</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Extract the payload</span>
+</span><span class='line'>    <span class="n">NSString</span> <span class="o">*</span><span class="n">type</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">activityType</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">NSString</span> <span class="o">*</span><span class="n">title</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">title</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">NSDictionary</span> <span class="o">*</span><span class="n">userInfo</span> <span class="o">=</span> <span class="p">[</span><span class="n">userActivity</span> <span class="n">userInfo</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Assume the app delegate has a text field to display the activity information</span>
+</span><span class='line'>    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;User activity is of type %@, has title %@, and user info %@&quot;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">restorationHandler</span><span class="p">(</span><span class="err">@</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">rootViewController</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">handled</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">handled</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中restorationHandler参数中的对象应该实现restoreUserActivityState:这个方法来进行后续的动作，在这里，我的root view controller只是简单的将数据显示出来</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">restoreUserActivityState:</span><span class="p">(</span><span class="n">NSUserActivity</span> <span class="o">*</span><span class="p">)</span><span class="nv">activity</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">self</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">activity</span><span class="p">.</span><span class="n">userInfo</span><span class="p">[</span><span class="s">@&quot;data&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到此，一次完整的activity交互就完成了。通过观察，数据的交互应该是通过蓝牙传输的。本文的demo可以在 <a href="https://github.com/volcan1987/HandOffDemo">这里</a> 找到</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">imrazor</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-03T21:42:01+08:00" pubdate data-updated="true">2014-09-03 09:42PM</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ios/'>iOS</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <div class="jiathis_style"><span class="jiathis_txt">分享到：</span>
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_fav"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share?uid=1925048" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+  </div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1925048" charset="utf-8"></script>
+  
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/07/02/kmp/" title="Previous Post: KMP模式匹配算法">&laquo; KMP模式匹配算法</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/10/14/lldb-debug/" title="Next Post: 使用lldb调试别人的程序">使用lldb调试别人的程序 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/09/03/hand-off" data-title="Hand off初探" data-url="http://imrazor.github.io/blog/2014/09/03/hand-off/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"volcan1987"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a> (3)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/suan-fa/'>算法</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  博客内文章均使用 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">知识共享 署名-相同方式共享</a>. 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

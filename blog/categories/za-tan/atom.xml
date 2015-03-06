@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 杂谈 | Imrazor's Blog]]></title>
+  <link href="http://imrazor.github.io/blog/categories/za-tan/atom.xml" rel="self"/>
+  <link href="http://imrazor.github.io/"/>
+  <updated>2015-03-06T21:10:13+08:00</updated>
+  <id>http://imrazor.github.io/</id>
+  <author>
+    <name><![CDATA[imrazor]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[博客搬家了]]></title>
+    <link href="http://imrazor.github.io/blog/2014/04/22/bo-ke-ban-jia-liao/"/>
+    <updated>2014-04-22T11:49:47+08:00</updated>
+    <id>http://imrazor.github.io/blog/2014/04/22/bo-ke-ban-jia-liao</id>
+    <content type="html"><![CDATA[<p>最近打算把博客搬到这里，主要有两个原因：一方面csdn广告多，样式不能自定义，另一方面看到很多大牛都在这里建博客，于是打算跟一下风，: )</p>
+
+<p>原博客里文章太碎，这次也打算好好整理下，之后陆续整理到这里来，以后也是本着只写精品的原则来。</p>
+
+<p>前段时间刚刚经历过一个多月的封闭开发，每天基本都是早晨9点到晚上12点的节奏。虽然很累，但是收获也不少。其实平时熟悉的节奏很难让自己暴露一些问题，可是在很疲劳并且高度压力之下，某些问题就很有可能出现。</p>
+
+<!-- more -->
+
+
+<p>出现问题实际不是坏事，改掉了，就是进步。</p>
+
+<p>哦对了，原博客地址: <a target="_blank" href="http://blog.csdn.net/volcan1987"><a href="http://blog.csdn.net/volcan1987">http://blog.csdn.net/volcan1987</a></a>，里面还是有些好东西的，有兴趣的话可以去淘淘。</p>
+]]></content>
+  </entry>
+  
+</feed>

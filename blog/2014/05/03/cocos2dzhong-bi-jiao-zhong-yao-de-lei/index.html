@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Cocos2d中比较重要的类 - Imrazor's Blog</title>
+  <meta name="author" content="imrazor">
+
+  
+  <meta name="description" content="一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
+CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://imrazor.github.io/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <meta name="google-site-verification" content="Gp52qtiSPK2bGlO9wzesss5gmlgD34wb05rGOHuJtNY" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Imrazor's Blog</a></h1>
+  
+    <h2>Stay Hungry, Stay Foolish</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:imrazor.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a target="_blank" href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Cocos2d中比较重要的类</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
+CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～60;<br />2、CCDirectorTypeMainLoop，比上个导演类型稍快，这个类型下使用uikit相关对象效果不好，并且不能自定义刷新率;<br />3、CCDirectorTypeThreadMainLoop，跟上个差不多，这个导演有在一个独立线程中有个timer来控制主线程中的main loop;<br />4、CCDirectorTypeDisplayLink，通过CADisplayLink刷新屏幕，这个类型下可以使用uikit中的对象，在ios3.1以上的版本才能使用这个类型，刷新率可以定为60，30，15每秒</p>
+
+<p>二、CCNode，一个父类，这个父类中包含了对OpenGL ES的操作，对action的展现等等</p>
+
+<p>三、CCScene，场景，CCNode的子类，同一时间CCDirector只能有一个场景，场景持有屏幕上所有的可见对象，是CCLayer的容器</p>
+
+<!--more-->
+
+
+<p>四、CCLayer，层，CCNode的子类，可以捕获touch和accelerometer事件，是CCSprite或其他可视游戏对象的容器</p>
+
+<p>五、CCSprite，精灵，CCNode子类，包含一些逻辑和图片的控制，比如你游戏中的敌人，主角，物品等等都是精灵</p>
+
+<p>六、CCSpriteBatchNode，CCNode子类，以前的版本叫sprite sheet，使用CCSpriteBatchNode有诸多好处:<br />
+1、减少OpenGL ES的bind call，这里简单说下图片的载入。当一张图片要显示时，首先它会被转为texture，之后装入内存，因为GPU大多认识解压后的图片（png是压缩格式的图片，GPU也可以处理一些压缩格式的，比如PVRTC），然后通过OpenGL ES把这张图片画到屏幕上，当一个场景载入大量图片时，势必会多次调用OpenGL ES，这样GPU都压力就会很大，帧数就掉下来了。使用CCSpriteBatchNode可以一次性的把当前场景所有的图片都载入进来，从而减少大量GPU的运算，帧数自然就高了;<br />
+2、减少内存占用，其实这一点现在已经不是最重要的了，因为3gs以后的设备都支持NPOT（NON POWER OF TWO）了。老GPU保存texture的时候只能存为power-of-two的大小，也就是你都图片是50x50像素的，最后在内存中最后就变为64x64的了，那么64 * 64 &ndash; 50 * 50这么大块的内存相当于浪费掉了（实际上，CPU和GPU操作图片内存地址不是一个，所以当GPU操作图片的时候，这个图片还要被考到GPU能操作的内存区域，所以那部分浪费都内存还会再被拷贝一便）。而使用texture atlas就没必要担心这个了，texture atlas让你把一个一个的图片放到一起，然后一次性载入内存，这样那些每张图片都浪费一点的内存就会大大减少了。不过从cocos2d1.1以后，默认只要设备支持NPOT，就会自动开启NPOT<br /></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">imrazor</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <div class="jiathis_style"><span class="jiathis_txt">分享到：</span>
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_fav"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share?uid=1925048" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+  </div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1925048" charset="utf-8"></script>
+  
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/04/22/bo-ke-ban-jia-liao/" title="Previous Post: 博客搬家了">&laquo; 博客搬家了</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/" title="Next Post: cocos2d中的动画、字体、菜单和声音">cocos2d中的动画、字体、菜单和声音 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei" data-title="cocos2d中比较重要的类" data-url="http://imrazor.github.io/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"volcan1987"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a> (3)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/suan-fa/'>算法</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  博客内文章均使用 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">知识共享 署名-相同方式共享</a>. 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>分析微信来优化自己的应用 - Imrazor's Blog</title>
+  <meta name="author" content="imrazor">
+
+  
+  <meta name="description" content="文章内容仅供学习交流，如有不妥，请联系我删除：） 用到的工具：Reveal，Charles，Hopper，越狱设备 流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <meta name="google-site-verification" content="Gp52qtiSPK2bGlO9wzesss5gmlgD34wb05rGOHuJtNY" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Imrazor's Blog</a></h1>
+  
+    <h2>Stay Hungry, Stay Foolish</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:imrazor.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a target="_blank" href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">分析微信来优化自己的应用</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-17T20:23:04+08:00" pubdate data-updated="true">2014-06-17 08:23PM</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>文章内容仅供学习交流，如有不妥，请联系我删除：）</p>
+
+<p>用到的工具：Reveal，Charles，Hopper，越狱设备</p>
+
+<p>流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。实时计算的圆角（CALayer的cornerRadius）也会加重GPU的运算，可是我们的程序经常会遇到需要用圆角的情况，所以如何高效的进行圆角显示就变得非常重要。</p>
+
+<p>Stack Overflow上也有一些优化的方案，比如让设计师提供带圆角，内部是透明色的图片；或者直接在服务器生成圆角图片等等。第一种方案不&#8221;优雅&#8221;，并且依然有透明色，第二种方案太死板，并且需服务端的支持。</p>
+
+<p>看到微信的聊天列表页也有头像是圆角，服务号头像是圆形，通讯录又没有圆角，而且滑动也很流畅，很好奇微信是如何实现的，于是打算使用工具分析一下。</p>
+
+<!--more-->
+
+
+<p>首先在越狱设备上安装微信，将Reveal的framework和dylib分别copy到越狱机的:/System/Library/Frameworks和:/Library/MobileSubstrate/DynamicLibrarie下，重启设备。之后可以看到微信的布局了</p>
+
+<p><img src="/images/blog/2014-6-17/reveal.png" title="weixin_layout" alt="Alt text" /></p>
+
+<p>通过Reveal我们看到微信头像是通过一个叫MainFrameHeadView展示的，那让我们看一下MainFrameHeadView大概是如何实现的，将微信的二进制文件拖到Hopper中，等待分析完成。</p>
+
+<p>分析完成后，搜索MainFrameHeadView</p>
+
+<p><img src="/images/blog/2014-6-17/hopper.png" title="weixin_xxview" alt="Alt text" /></p>
+
+<p>在这个类的代码段中，发现关键字CHeadImageMgr的getRoundImage:size:conerSize:forSence:方法，看其方法名就大概猜到是其对图片进行了圆角处理、或者是获取经过圆角处理的图片了。继续搜索CHeadImageMgr</p>
+
+<p><img src="/images/blog/2014-6-17/c_head_m.png" title="weixin_cheadm" alt="Alt text" /></p>
+
+<p>看到此类基本就是对头像进行了各种各样的处理。通过Charles抓包，发现圆形头像实际是服务器生成好的</p>
+
+<p><img src="/images/blog/2014-6-17/charles.png" title="weixin_circle" alt="Alt text" /></p>
+
+<p>至此，我们大概知道，微信中对话列表的用户头像圆角是本地生成的。原始头像下载好后，很可能立刻进行图片处理，保留不带圆角和带圆角的头像并进行本地持久化。以后圆角头像如果再次用到，就先走内存缓存，内存没有检查本地，本地没有再从网络获取（类似SDWebImage，只不过多了一步下载完成后进行了图片处理）。</p>
+
+<p>本地缓存的圆角图片，跟背景颜色相同的UILabel，再加上不复杂的UI逻辑，你的UITableView也能像微信的对话列表一样流畅。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">imrazor</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-17T20:23:04+08:00" pubdate data-updated="true">2014-06-17 08:23PM</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ios/'>iOS</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <div class="jiathis_style"><span class="jiathis_txt">分享到：</span>
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_fav"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share?uid=1925048" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+  </div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1925048" charset="utf-8"></script>
+  
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/07/box2d-of-cocos2d/" title="Previous Post: cocos2d中的box2d">&laquo; cocos2d中的box2d</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/07/02/kmp/" title="Next Post: KMP模式匹配算法">KMP模式匹配算法 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/06/17/optimize-app-by-analyze-weixin" data-title="分析微信来优化自己的应用" data-url="http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"volcan1987"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a> (3)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/suan-fa/'>算法</a> (1)
+      </li>
+    
+      <li class="post">
+        <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  博客内文章均使用 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">知识共享 署名-相同方式共享</a>. 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
