@@ -9,7 +9,7 @@
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="最近看到有人折腾树莓派，自己也想倒腾点东西。树莓派性能较差，于是买了个国产的板子——cubieboard 开始 首先是装系统，我装的debian server（下载地址），双卡板系统通过Win32DikImager可以很方便的刷好 接下来要驱动无线网卡，我的usb无线网卡为edup-n8508gs &hellip;">
+  <meta name="description" content="首先创建一个Amazon Web Services (AWS) ，新用户有一年的免费试用权，使用free对应的配置，每月可以使用15G流量和750小时，网上有对应申请AWS的教程 服务器使用的操作系统为ubuntu，使用ssh连接到EC2实例； ssh -i key_pair.pem ubuntu &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,68 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/06/create-your-own-vpn-seearver/">创建自己的VPN服务器</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-06T23:42:40+08:00" pubdate data-updated="true">2015-03-06 11:42PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>首先创建一个Amazon Web Services (AWS) ，新用户有一年的免费试用权，使用free对应的配置，每月可以使用15G流量和750小时，网上有对应申请AWS的教程</p>
+
+<p>服务器使用的操作系统为ubuntu，使用ssh连接到EC2实例；</p>
+
+<pre><code>ssh -i key_pair.pem ubuntu@ip
+</code></pre>
+
+<p>安装pptpd：</p>
+
+<pre><code>sudo aptitude install pptpd
+</code></pre>
+
+<p>编辑pptp配置文件：</p>
+
+<pre><code>sudo vim /etc/pptpd.conf
+</code></pre>
+
+<p>在最后一行加上：</p>
+
+<pre><code>localip 192.168.240.1
+remoteip 192.168.240.2-9
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/03/06/create-your-own-vpn-seearver/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -551,52 +613,9 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/22/bo-ke-ban-jia-liao/">博客搬家了</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-22T11:49:47+08:00" pubdate data-updated="true">2014-04-22 11:49AM</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近打算把博客搬到这里，主要有两个原因：一方面csdn广告多，样式不能自定义，另一方面看到很多大牛都在这里建博客，于是打算跟一下风，: )</p>
-
-<p>原博客里文章太碎，这次也打算好好整理下，之后陆续整理到这里来，以后也是本着只写精品的原则来。</p>
-
-<p>前段时间刚刚经历过一个多月的封闭开发，每天基本都是早晨9点到晚上12点的节奏。虽然很累，但是收获也不少。其实平时熟悉的节奏很难让自己暴露一些问题，可是在很疲劳并且高度压力之下，某些问题就很有可能出现。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/22/bo-ke-ban-jia-liao/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -628,11 +647,19 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
         <a class='category' href='/blog/categories/cubieboard/'>cubieboard</a> (1)
       </li>
     
+      <li class="post">
+        <a class='category' href='/blog/categories/gong-ju/'>工具</a> (1)
+      </li>
+    
   </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/03/06/create-your-own-vpn-seearver/">创建自己的VPN服务器</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
@@ -648,10 +675,6 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
     
       <li class="post">
         <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/02/kmp/">KMP模式匹配算法</a>
       </li>
     
   </ul>
