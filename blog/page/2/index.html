@@ -9,7 +9,8 @@
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="最近打算把博客搬到这里，主要有两个原因：一方面csdn广告多，样式不能自定义，另一方面看到很多大牛都在这里建博客，于是打算跟一下风，: ) 原博客里文章太碎，这次也打算好好整理下，之后陆续整理到这里来，以后也是本着只写精品的原则来。 前段时间刚刚经历过一个多月的封闭开发， &hellip;">
+  <meta name="description" content="一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
+CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +65,52 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/">Cocos2d中比较重要的类</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
+CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～60;<br />2、CCDirectorTypeMainLoop，比上个导演类型稍快，这个类型下使用uikit相关对象效果不好，并且不能自定义刷新率;<br />3、CCDirectorTypeThreadMainLoop，跟上个差不多，这个导演有在一个独立线程中有个timer来控制主线程中的main loop;<br />4、CCDirectorTypeDisplayLink，通过CADisplayLink刷新屏幕，这个类型下可以使用uikit中的对象，在ios3.1以上的版本才能使用这个类型，刷新率可以定为60，30，15每秒</p>
+
+<p>二、CCNode，一个父类，这个父类中包含了对OpenGL ES的操作，对action的展现等等</p>
+
+<p>三、CCScene，场景，CCNode的子类，同一时间CCDirector只能有一个场景，场景持有屏幕上所有的可见对象，是CCLayer的容器</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -125,7 +172,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (1)
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (2)
       </li>
     
       <li class="post">
@@ -155,6 +202,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/17/2015-review/">2015总结</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/03/06/create-your-own-vpn-seearver/">创建自己的VPN服务器</a>
       </li>
     
@@ -168,10 +219,6 @@
     
       <li class="post">
         <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/03/hand-off/">Hand Off初探</a>
       </li>
     
   </ul>
