@@ -9,7 +9,7 @@
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="2015对我来说可谓是喜忧参半的一年，喜的是工作上有所进步，忧的得了一场不大不小的病。 什么最重要 其实这一年对我影响最大的，就是这不大不小的病，他可谓给了我重重的一巴掌，让我清醒过来，明白什么才是最重要的。 10年毕业至得病前，我一直觉得事业是最重要的。为了这个，努力和奋斗自然不能少，平日加班， &hellip;">
+  <meta name="description" content="前言 随着业务模块及模块间相互调用的需求越来越多，如果解决耦合及方便模块间调用就变的越来越重要，解决这些问题的一个途径便是组件化 比如我们现在有阅读、电影票、泡泡、秀场、电商等等，这些模块都有调起登录、分享、播放器的需求，一些还需要调起其他的模块。如果直接引用进行调起，那模块的独立测试将变得困难（ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,114 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/21/componentization/">组件化之路</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-21T21:10:22+08:00" pubdate data-updated="true">2016-04-21 09:10PM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>随着业务模块及模块间相互调用的需求越来越多，如果解决耦合及方便模块间调用就变的越来越重要，解决这些问题的一个途径便是组件化</p>
+
+<p>比如我们现在有阅读、电影票、泡泡、秀场、电商等等，这些模块都有调起登录、分享、播放器的需求，一些还需要调起其他的模块。如果直接引用进行调起，<strong>那模块的独立测试将变得困难</strong>（需要把别的模块也加到自己的测试工程中，如果别的模块又饮用了其他，那么最后会把所有的模块都带进来），<strong>而且一旦模块接口发生变化，则所有使用的地方都要进行修改</strong></p>
+
+<h3>中介者模式</h3>
+
+<p>解决耦合的一个比较通用的方式便是使用Mediator，各个模块都耦合Mediator，这样模块间则不需要相互引用了，并且模块间调起都通过统一接口进行，降低了学习成本</p>
+
+<h3>第一次组件化</h3>
+
+<p>第一次组件化我们的主要目的是解决耦合，于是创建了一个叫engine的模块，所有的模块间交互都通过engine，比如调起登录类似这样：</p>
+
+<pre><code>EngineObj *obj = [EngineObj engineObjWithModule:ModuleLogin type:LoginRegisterType andParams:@{@"info":@"请先注册"}];
+EngineCallback *cb = [EngineCallback engineCallbackWithTarget:self action:@selector(registerDone:)];
+EngineSend(obj, cb)
+</code></pre>
+
+<p>这样调起者就可以不用关系调起注册模块的细节，不论注册成功或失败，调用者都会通过registerDone:方法得到结果</p>
+
+<p>而engine会对应模块维护一个协议，比如上面代码中，打开的module是ModuleLogin，那就路由到openLoginModule:方法，具体的调起逻辑由主工程的一个manager实现，这个manager对象在程序启动时注入到engine中，并且实现了engine中的模块协议</p>
+
+<h3>第一次组件化的问题</h3>
+
+<p>现在看来，第一次组件化是有很多问题的：</p>
+
+<p>1、模块type需要在engine中维护，新增时需要修改engine的头文件（新增一种module type），新增调起协议。这样一来就违反了开闭原则，虽然修改不多，但还是需要去维护</p>
+
+<p>2、在新增模块或模块接口变更时，主工程的manager需要去维护，耗费人力</p>
+
+<p>3、想调起新增的模块必须新增调用代码</p>
+
+<h3>第二次组件化</h3>
+
+<p>第二次组件化主要解决了上一次的问题，并且模块的创建模块自己最清楚。所以这一次我们改成了<strong>注册制</strong></p>
+
+<p>每个模块在对应的模块中进行注册，并实现一个协议，类似这样：</p>
+
+<pre><code>+ (void)load
+{
+    [Engine resigserID:@"2" withClass:[self Class]];
+}
+
++ (void)launchWithObj(Obj *)obj
+{
+    //模块内部进行创建;
+}
+</code></pre>
+
+<p>而这个Obj类包含了3个参数：</p>
+
+<pre><code>//服务器原始数据，包含了模块id，及模块所需参数
+@property (nonatomic, strong) NSDictionary *serverParams;
+//客户端提供的数据，比如新模块承载的ViewController
+@property (nonatomic, strong) NSDictionary *clientParams;
+//模块退出时的回调
+@property (nonatomic, copy) EngineClose close;
+</code></pre>
+
+<p>调起代码：</p>
+
+<pre><code>Obj *obj = [Obj objWithSP:sp andCP:cp closeBlock:close];
+EngineOpen(obj);
+</code></pre>
+
+<h3>第二次组件化的优点</h3>
+
+<p>对比第一次，这一次可以说遵循了开闭原则，新增模块engine无需维护；此外，新模块接入时主工程无序添加任何代码；调用方添加一次调用逻辑，即支持了所有模块（包括后续新增的模块）</p>
+
+<h3>总结</h3>
+
+<p>组件化需要服务器、各模块的支持。入口的统一也方便做一些统计，比如模块的启动次数，记录栈顶模块还可以在崩溃时知道是哪个模块是active状态，从而为崩溃统计提供更多的信息</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -581,62 +689,6 @@ c s d n
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/">Cocos2d中的动画、字体、菜单和声音</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-03T17:49:41+08:00" pubdate data-updated="true">2014-05-03 05:49PM</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>一、Action和Animation。cocos2d提供了格式各样的action和animation</p>
-
-<p>举个例子</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">CCAction</span> <span class="o">*</span><span class="n">moveAction</span> <span class="o">=</span> <span class="p">[</span><span class="n">CCMoveBy</span> <span class="nl">actionWithDuration:</span><span class="mf">2.0f</span> <span class="nl">position:</span><span class="n">ccp</span><span class="p">(</span><span class="mf">200.0f</span><span class="p">,</span><span class="mf">0.0f</span><span class="p">)];</span>
-</span><span class='line'><span class="p">[</span><span class="n">vikingSprite</span> <span class="nl">runAction:</span><span class="n">moveAction</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>假如vikingSprite是我们已经建立好的一个精灵，那么这个精灵就会朝着position的位置移动，两秒后就到指定位置了</p>
-
-<p>一般来讲，精灵的跟动画相关的有CCAction，CCAnimation，CCAnimate三个对象。一般都是先创建CCAnimation对象，通过CCAnimation创建CCAnimate，再通过CCAnimate创建CCAction，最后精灵对象run一下这个action对象，动画就跑起来了</p>
-
-<p>比较常用的几个action有CCRepeatForever，一个无限重复的动作。CCSequence队列执行一个动作，CCSpawn同时执行多个动作，这三个类都是CCAction的子类，多个action可以互相嵌套着用</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -660,7 +712,7 @@ c s d n
       </li>
     
       <li class="post">
-        <a class='category' href='/blog/categories/ios/'>iOS</a> (4)
+        <a class='category' href='/blog/categories/ios/'>iOS</a> (5)
       </li>
     
       <li class="post">
@@ -682,6 +734,10 @@ c s d n
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/21/componentization/">组件化之路</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/17/2015-review/">2015总结</a>
       </li>
     
@@ -695,10 +751,6 @@ c s d n
     
       <li class="post">
         <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/14/lldb-debug/">使用lldb调试别人的程序</a>
       </li>
     
   </ul>

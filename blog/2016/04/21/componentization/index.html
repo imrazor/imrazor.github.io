@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Cocos2d中比较重要的类 - Imrazor's Blog</title>
+  <title>组件化之路 - Imrazor's Blog</title>
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
-CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～ &hellip;">
+  <meta name="description" content="前言 随着业务模块及模块间相互调用的需求越来越多，如果解决耦合及方便模块间调用就变的越来越重要，解决这些问题的一个途径便是组件化 比如我们现在有阅读、电影票、泡泡、秀场、电商等等，这些模块都有调起登录、分享、播放器的需求，一些还需要调起其他的模块。如果直接引用进行调起，那模块的独立测试将变得困难（ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://imrazor.github.io/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei">
+  <link rel="canonical" href="http://imrazor.github.io/blog/2016/04/21/componentization">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
@@ -68,7 +67,7 @@ CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要
   
   <header>
     
-      <h1 class="entry-title">Cocos2d中比较重要的类</h1>
+      <h1 class="entry-title">组件化之路</h1>
     
     
       <p class="meta">
@@ -84,30 +83,86 @@ CCDirector有四种类型：1、CCDirectorTypeNSTimer，如果你的程序中要
   
 
 
-<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+<time datetime="2016-04-21T21:10:22+08:00" pubdate data-updated="true">2016-04-21 09:10PM</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>一、CCDirector，导演，单例，主要负责场景切换，控制OpenGL ES中的一些设置（如投影）。
-CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序中要使用uikit中的对象并且支持ios3.1以前的版本，使用此类型，此类型下可以设置每秒刷新率1～60;<br />2、CCDirectorTypeMainLoop，比上个导演类型稍快，这个类型下使用uikit相关对象效果不好，并且不能自定义刷新率;<br />3、CCDirectorTypeThreadMainLoop，跟上个差不多，这个导演有在一个独立线程中有个timer来控制主线程中的main loop;<br />4、CCDirectorTypeDisplayLink，通过CADisplayLink刷新屏幕，这个类型下可以使用uikit中的对象，在ios3.1以上的版本才能使用这个类型，刷新率可以定为60，30，15每秒</p>
+<div class="entry-content"><h2>前言</h2>
 
-<p>二、CCNode，一个父类，这个父类中包含了对OpenGL ES的操作，对action的展现等等</p>
+<p>随着业务模块及模块间相互调用的需求越来越多，如果解决耦合及方便模块间调用就变的越来越重要，解决这些问题的一个途径便是组件化</p>
 
-<p>三、CCScene，场景，CCNode的子类，同一时间CCDirector只能有一个场景，场景持有屏幕上所有的可见对象，是CCLayer的容器</p>
+<p>比如我们现在有阅读、电影票、泡泡、秀场、电商等等，这些模块都有调起登录、分享、播放器的需求，一些还需要调起其他的模块。如果直接引用进行调起，<strong>那模块的独立测试将变得困难</strong>（需要把别的模块也加到自己的测试工程中，如果别的模块又饮用了其他，那么最后会把所有的模块都带进来），<strong>而且一旦模块接口发生变化，则所有使用的地方都要进行修改</strong></p>
 
-<!--more-->
+<h3>中介者模式</h3>
 
+<p>解决耦合的一个比较通用的方式便是使用Mediator，各个模块都耦合Mediator，这样模块间则不需要相互引用了，并且模块间调起都通过统一接口进行，降低了学习成本</p>
 
-<p>四、CCLayer，层，CCNode的子类，可以捕获touch和accelerometer事件，是CCSprite或其他可视游戏对象的容器</p>
+<h3>第一次组件化</h3>
 
-<p>五、CCSprite，精灵，CCNode子类，包含一些逻辑和图片的控制，比如你游戏中的敌人，主角，物品等等都是精灵</p>
+<p>第一次组件化我们的主要目的是解决耦合，于是创建了一个叫engine的模块，所有的模块间交互都通过engine，比如调起登录类似这样：</p>
 
-<p>六、CCSpriteBatchNode，CCNode子类，以前的版本叫sprite sheet，使用CCSpriteBatchNode有诸多好处:<br />
-1、减少OpenGL ES的bind call，这里简单说下图片的载入。当一张图片要显示时，首先它会被转为texture，之后装入内存，因为GPU大多认识解压后的图片（png是压缩格式的图片，GPU也可以处理一些压缩格式的，比如PVRTC），然后通过OpenGL ES把这张图片画到屏幕上，当一个场景载入大量图片时，势必会多次调用OpenGL ES，这样GPU都压力就会很大，帧数就掉下来了。使用CCSpriteBatchNode可以一次性的把当前场景所有的图片都载入进来，从而减少大量GPU的运算，帧数自然就高了;<br />
-2、减少内存占用，其实这一点现在已经不是最重要的了，因为3gs以后的设备都支持NPOT（NON POWER OF TWO）了。老GPU保存texture的时候只能存为power-of-two的大小，也就是你都图片是50x50像素的，最后在内存中最后就变为64x64的了，那么64 * 64 &ndash; 50 * 50这么大块的内存相当于浪费掉了（实际上，CPU和GPU操作图片内存地址不是一个，所以当GPU操作图片的时候，这个图片还要被考到GPU能操作的内存区域，所以那部分浪费都内存还会再被拷贝一便）。而使用texture atlas就没必要担心这个了，texture atlas让你把一个一个的图片放到一起，然后一次性载入内存，这样那些每张图片都浪费一点的内存就会大大减少了。不过从cocos2d1.1以后，默认只要设备支持NPOT，就会自动开启NPOT<br /></p>
+<pre><code>EngineObj *obj = [EngineObj engineObjWithModule:ModuleLogin type:LoginRegisterType andParams:@{@"info":@"请先注册"}];
+EngineCallback *cb = [EngineCallback engineCallbackWithTarget:self action:@selector(registerDone:)];
+EngineSend(obj, cb)
+</code></pre>
+
+<p>这样调起者就可以不用关系调起注册模块的细节，不论注册成功或失败，调用者都会通过registerDone:方法得到结果</p>
+
+<p>而engine会对应模块维护一个协议，比如上面代码中，打开的module是ModuleLogin，那就路由到openLoginModule:方法，具体的调起逻辑由主工程的一个manager实现，这个manager对象在程序启动时注入到engine中，并且实现了engine中的模块协议</p>
+
+<h3>第一次组件化的问题</h3>
+
+<p>现在看来，第一次组件化是有很多问题的：</p>
+
+<p>1、模块type需要在engine中维护，新增时需要修改engine的头文件（新增一种module type），新增调起协议。这样一来就违反了开闭原则，虽然修改不多，但还是需要去维护</p>
+
+<p>2、在新增模块或模块接口变更时，主工程的manager需要去维护，耗费人力</p>
+
+<p>3、想调起新增的模块必须新增调用代码</p>
+
+<h3>第二次组件化</h3>
+
+<p>第二次组件化主要解决了上一次的问题，并且模块的创建模块自己最清楚。所以这一次我们改成了<strong>注册制</strong></p>
+
+<p>每个模块在对应的模块中进行注册，并实现一个协议，类似这样：</p>
+
+<pre><code>+ (void)load
+{
+    [Engine resigserID:@"2" withClass:[self Class]];
+}
+
++ (void)launchWithObj(Obj *)obj
+{
+    //模块内部进行创建;
+}
+</code></pre>
+
+<p>而这个Obj类包含了3个参数：</p>
+
+<pre><code>//服务器原始数据，包含了模块id，及模块所需参数
+@property (nonatomic, strong) NSDictionary *serverParams;
+//客户端提供的数据，比如新模块承载的ViewController
+@property (nonatomic, strong) NSDictionary *clientParams;
+//模块退出时的回调
+@property (nonatomic, copy) EngineClose close;
+</code></pre>
+
+<p>调起代码：</p>
+
+<pre><code>Obj *obj = [Obj objWithSP:sp andCP:cp closeBlock:close];
+EngineOpen(obj);
+</code></pre>
+
+<h3>第二次组件化的优点</h3>
+
+<p>对比第一次，这一次可以说遵循了开闭原则，新增模块engine无需维护；此外，新模块接入时主工程无序添加任何代码；调用方添加一次调用逻辑，即支持了所有模块（包括后续新增的模块）</p>
+
+<h3>总结</h3>
+
+<p>组件化需要服务器、各模块的支持。入口的统一也方便做一些统计，比如模块的启动次数，记录栈顶模块还可以在崩溃时知道是哪个模块是active状态，从而为崩溃统计提供更多的信息</p>
 </div>
 
 
@@ -130,12 +185,12 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
   
 
 
-<time datetime="2014-05-03T13:25:52+08:00" pubdate data-updated="true">2014-05-03 01:25PM</time>
+<time datetime="2016-04-21T21:10:22+08:00" pubdate data-updated="true">2016-04-21 09:10PM</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/cocos2d/'>cocos2d</a>
+    <a class='category' href='/blog/categories/ios/'>iOS</a>
   
 </span>
 
@@ -175,10 +230,8 @@ var jiathis_config={
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/04/22/bo-ke-ban-jia-liao/" title="Previous Post: 博客搬家了">&laquo; 博客搬家了</a>
+        <a class="basic-alignment left" href="/blog/2016/01/17/2015-review/" title="Previous Post: 2015总结">&laquo; 2015总结</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/05/03/cocos2dzhong-de-dong-hua/" title="Next Post: cocos2d中的动画、字体、菜单和声音">cocos2d中的动画、字体、菜单和声音 &raquo;</a>
       
     </p>
   </footer>
@@ -187,7 +240,7 @@ var jiathis_config={
 
   <section>
     <h1>Comments</h1>
-    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei" data-title="cocos2d中比较重要的类" data-url="http://imrazor.github.io/blog/2014/05/03/cocos2dzhong-bi-jiao-zhong-yao-de-lei/"></div>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2016/04/21/componentization" data-title="组件化之路" data-url="http://imrazor.github.io/blog/2016/04/21/componentization/"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"volcan1987"};
 	(function() {

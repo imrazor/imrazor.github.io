@@ -4,7 +4,7 @@
   <title><![CDATA[Category: iOS | Imrazor's Blog]]></title>
   <link href="http://imrazor.github.io/blog/categories/ios/atom.xml" rel="self"/>
   <link href="http://imrazor.github.io/"/>
-  <updated>2016-01-19T10:01:00+08:00</updated>
+  <updated>2016-04-21T21:20:26+08:00</updated>
   <id>http://imrazor.github.io/</id>
   <author>
     <name><![CDATA[imrazor]]></name>
@@ -12,6 +12,87 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[组件化之路]]></title>
+    <link href="http://imrazor.github.io/blog/2016/04/21/componentization/"/>
+    <updated>2016-04-21T21:10:22+08:00</updated>
+    <id>http://imrazor.github.io/blog/2016/04/21/componentization</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>随着业务模块及模块间相互调用的需求越来越多，如果解决耦合及方便模块间调用就变的越来越重要，解决这些问题的一个途径便是组件化</p>
+
+<p>比如我们现在有阅读、电影票、泡泡、秀场、电商等等，这些模块都有调起登录、分享、播放器的需求，一些还需要调起其他的模块。如果直接引用进行调起，<strong>那模块的独立测试将变得困难</strong>（需要把别的模块也加到自己的测试工程中，如果别的模块又饮用了其他，那么最后会把所有的模块都带进来），<strong>而且一旦模块接口发生变化，则所有使用的地方都要进行修改</strong></p>
+
+<h3>中介者模式</h3>
+
+<p>解决耦合的一个比较通用的方式便是使用Mediator，各个模块都耦合Mediator，这样模块间则不需要相互引用了，并且模块间调起都通过统一接口进行，降低了学习成本</p>
+
+<h3>第一次组件化</h3>
+
+<p>第一次组件化我们的主要目的是解决耦合，于是创建了一个叫engine的模块，所有的模块间交互都通过engine，比如调起登录类似这样：</p>
+
+<pre><code>EngineObj *obj = [EngineObj engineObjWithModule:ModuleLogin type:LoginRegisterType andParams:@{@"info":@"请先注册"}];
+EngineCallback *cb = [EngineCallback engineCallbackWithTarget:self action:@selector(registerDone:)];
+EngineSend(obj, cb)
+</code></pre>
+
+<p>这样调起者就可以不用关系调起注册模块的细节，不论注册成功或失败，调用者都会通过registerDone:方法得到结果</p>
+
+<p>而engine会对应模块维护一个协议，比如上面代码中，打开的module是ModuleLogin，那就路由到openLoginModule:方法，具体的调起逻辑由主工程的一个manager实现，这个manager对象在程序启动时注入到engine中，并且实现了engine中的模块协议</p>
+
+<h3>第一次组件化的问题</h3>
+
+<p>现在看来，第一次组件化是有很多问题的：</p>
+
+<p>1、模块type需要在engine中维护，新增时需要修改engine的头文件（新增一种module type），新增调起协议。这样一来就违反了开闭原则，虽然修改不多，但还是需要去维护</p>
+
+<p>2、在新增模块或模块接口变更时，主工程的manager需要去维护，耗费人力</p>
+
+<p>3、想调起新增的模块必须新增调用代码</p>
+
+<h3>第二次组件化</h3>
+
+<p>第二次组件化主要解决了上一次的问题，并且模块的创建模块自己最清楚。所以这一次我们改成了<strong>注册制</strong></p>
+
+<p>每个模块在对应的模块中进行注册，并实现一个协议，类似这样：</p>
+
+<pre><code>+ (void)load
+{
+    [Engine resigserID:@"2" withClass:[self Class]];
+}
+
++ (void)launchWithObj(Obj *)obj
+{
+    //模块内部进行创建;
+}
+</code></pre>
+
+<p>而这个Obj类包含了3个参数：</p>
+
+<pre><code>//服务器原始数据，包含了模块id，及模块所需参数
+@property (nonatomic, strong) NSDictionary *serverParams;
+//客户端提供的数据，比如新模块承载的ViewController
+@property (nonatomic, strong) NSDictionary *clientParams;
+//模块退出时的回调
+@property (nonatomic, copy) EngineClose close;
+</code></pre>
+
+<p>调起代码：</p>
+
+<pre><code>Obj *obj = [Obj objWithSP:sp andCP:cp closeBlock:close];
+EngineOpen(obj);
+</code></pre>
+
+<h3>第二次组件化的优点</h3>
+
+<p>对比第一次，这一次可以说遵循了开闭原则，新增模块engine无需维护；此外，新模块接入时主工程无序添加任何代码；调用方添加一次调用逻辑，即支持了所有模块（包括后续新增的模块）</p>
+
+<h3>总结</h3>
+
+<p>组件化需要服务器、各模块的支持。入口的统一也方便做一些统计，比如模块的启动次数，记录栈顶模块还可以在崩溃时知道是哪个模块是active状态，从而为崩溃统计提供更多的信息</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用lldb和Hopper破解Reveal的试用限制]]></title>
