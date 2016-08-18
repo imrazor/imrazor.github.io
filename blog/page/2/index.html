@@ -9,10 +9,11 @@
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="一、Action和Animation。cocos2d提供了格式各样的action和animation 举个例子 1
-2
-CCAction *moveAction = [CCMoveBy actionWithDuration:2.0f position:ccp(200.0f,0.0f)];
-[ &hellip;">
+  <meta name="description" content="一、准备工作
+引入box2d包，在需要使用box2d的文件中加入box2d的头文件；由于box2d是c++编写的，所以要把引入box2d的所有文件后缀名都改为.mm 二、box2d中的一些重要参数
+1、gravity，重力加速度，同现实世界中的g，向量
+2、shape，形状，形状是有大小的
+3、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +68,61 @@ CCAction *moveAction = [CCMoveBy actionWithDuration:2.0f position:ccp(200.0f,0.0
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/07/box2d-of-cocos2d/">Cocos2d中的box2d</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-07T07:49:49+08:00" pubdate data-updated="true">2014-05-07 07:49AM</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一、准备工作<br />
+引入box2d包，在需要使用box2d的文件中加入box2d的头文件；由于box2d是c++编写的，所以要把引入box2d的所有文件后缀名都改为.mm</p>
+
+<p>二、box2d中的一些重要参数<br />
+1、gravity，重力加速度，同现实世界中的g，向量<br />
+2、shape，形状，形状是有大小的<br />
+3、density，密度<br />
+4、friction，摩擦力<br />
+5、restitution，恢复，此参数用于碰撞，如果两个物体有不同的restitution，box2d总是选择比较大的restitution进行计算<br />
+6、meter，距离单位，灵活定义你的meter，当对象为0.1至10meters的时候，box2d可以很好的处理它们，</p>
+
+<p>三、box2d之hello world<br />
+让我们先创建一个box2d项目。创建好之后运行，每当我们点击屏幕时，会落下一个小方块：</p>
+
+<p><img src="/images/blog/1343575297_7773.png" title="helloworld" alt="Alt text" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/07/box2d-of-cocos2d/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -230,7 +286,7 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
   <ul id="recent_posts">
     
       <li class="post">
-        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (2)
+        <a class='category' href='/blog/categories/za-tan/'>杂谈</a> (3)
       </li>
     
       <li class="post">
@@ -260,6 +316,10 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/08/18/programmer-advanced/">程序员进阶之路</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/04/21/componentization/">组件化之路</a>
       </li>
     
@@ -273,10 +333,6 @@ CCDirector有四种类型：<br />1、CCDirectorTypeNSTimer，如果你的程序
     
       <li class="post">
         <a href="/blog/2015/01/14/use-cubieboard-as-an-ap/">使用cubieboard创建热点</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/20/use-lldb-and-hopper-break-reveal/">使用lldb和Hopper破解Reveal的试用限制</a>
       </li>
     
   </ul>

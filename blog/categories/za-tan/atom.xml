@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 杂谈 | Imrazor's Blog]]></title>
   <link href="http://imrazor.github.io/blog/categories/za-tan/atom.xml" rel="self"/>
   <link href="http://imrazor.github.io/"/>
-  <updated>2016-04-21T21:20:26+08:00</updated>
+  <updated>2016-08-18T22:52:40+08:00</updated>
   <id>http://imrazor.github.io/</id>
   <author>
     <name><![CDATA[imrazor]]></name>
@@ -12,6 +12,74 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[程序员进阶之路]]></title>
+    <link href="http://imrazor.github.io/blog/2016/08/18/programmer-advanced/"/>
+    <updated>2016-08-18T22:41:50+08:00</updated>
+    <id>http://imrazor.github.io/blog/2016/08/18/programmer-advanced</id>
+    <content type="html"><![CDATA[<p>今天公司做了一次内部培训，讲师是陆其明，主题是程序员进阶之路。感觉讲的非常好，做个摘要留存一下</p>
+
+<h2>程序员进阶的三个要素：</h2>
+
+<h3>一、专业</h3>
+
+<p><strong>没有救世主</strong>，不能指望别人，只能靠自己</p>
+
+<p><strong>静得下心</strong>，静下心来沉淀、积累，大牛不是一年两年就练就的</p>
+
+<p><strong>钻得进去</strong>，钻的深，才能了解真正的原理，而不是浮于表面</p>
+
+<p><strong>如痴如醉</strong>，当设计或是完成一个功能时，全身心的投入</p>
+
+<p><strong>系统、全面</strong>，当对某个系统足够了解时，你站的高度就会高，对系统的整体运作也会有全面的认识</p>
+
+<p><strong>实战磨练</strong>，多多实践，实战岀真知，某种设计是不是有效，只有在使用的时候才知道</p>
+
+<p><strong>总结、积累</strong>，善于总结积累，下次遇到类似问题就容易解决了，而且经常总结会慢慢提高</p>
+
+<h3>二、分享</h3>
+
+<p>勤加练习，如果你天天埋头写代码，连讨论、反思或者学习的时间都没有，你将得不到真正的进步。</p>
+
+<blockquote><p>eg：你天天开车上下班，但是你永远也不会成为真正的车手</p></blockquote>
+
+<p>要在磨练工艺宇思考如何提高工艺之间找到一个适当的平衡点</p>
+
+<p>开放的心态，阅读编程相关的博客或书籍，学会读源代码</p>
+
+<p>最好的学习方法就是边做边学</p>
+
+<p>成为杰出的程序员跟写代码没太大关系，坚韧不拔的精神很重要，更重要的是要有良好的沟通技巧</p>
+
+<p>想从优秀到卓越，必须培养起有效沟通的能力，与同事沟通，与老板沟通，与用户沟通，最终与全世界沟通</p>
+
+<p>如何提高沟通能力？写博客是个好方法</p>
+
+<h3>三、职业精神</h3>
+
+<p>关注公司战略，达成公司目标，与公司共同成长</p>
+
+<p>心态平和，内心有一份坚持，该做什么不该做什么，do the right thing</p>
+
+<p>快乐工作，快乐不是因为拥有的多，而是计较的少</p>
+
+<blockquote><p>eg：不要同事升职加薪，自己没有就不高兴</p></blockquote>
+
+<p>软件开发者的工作不是写代码，而是解决问题，关键是解决问题的能力</p>
+
+<h4>最后讲师还说了一些转型问题：</h4>
+
+<p>从一线开发变为管理，实际并不是晋升，而是转型了</p>
+
+<p>管理者的定义：管理者是通过别人来完成工作的人</p>
+
+<p>成为优秀的管理者要做到两点：确保你的员工能够工作，关心它们（把他们当人看，而不是资源）
+Keep them busy，make them happy</p>
+
+<blockquote><p>eg：老师问我，你这两天参加管理课程，你认为你的部下能完成工作的多少，我：50%吧（因为我技术比他们好很多，所以平时核心功能或者难点都是我来完成），老师：你这样不是管理者，而是super doer</p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[2015总结]]></title>

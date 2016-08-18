@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>分析微信来优化自己的应用 - Imrazor's Blog</title>
+  <title>程序员进阶之路 - Imrazor's Blog</title>
   <meta name="author" content="imrazor">
 
   
-  <meta name="description" content="文章内容仅供学习交流，如有不妥，请联系我删除：） 用到的工具：Reveal，Charles，Hopper，越狱设备 流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。 &hellip;">
+  <meta name="description" content="今天公司做了一次内部培训，讲师是陆其明，主题是程序员进阶之路。感觉讲的非常好，做个摘要留存一下 程序员进阶的三个要素： 一、专业 没有救世主，不能指望别人，只能靠自己 静得下心，静下心来沉淀、积累，大牛不是一年两年就练就的 钻得进去，钻的深，才能了解真正的原理，而不是浮于表面 如痴如醉， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin">
+  <link rel="canonical" href="http://imrazor.github.io/blog/2016/08/18/programmer-advanced">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Imrazor's Blog" type="application/atom+xml">
@@ -67,7 +67,7 @@
   
   <header>
     
-      <h1 class="entry-title">分析微信来优化自己的应用</h1>
+      <h1 class="entry-title">程序员进阶之路</h1>
     
     
       <p class="meta">
@@ -83,47 +83,73 @@
   
 
 
-<time datetime="2014-06-17T20:23:04+08:00" pubdate data-updated="true">2014-06-17 08:23PM</time>
+<time datetime="2016-08-18T22:41:50+08:00" pubdate data-updated="true">2016-08-18 10:41PM</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>文章内容仅供学习交流，如有不妥，请联系我删除：）</p>
+<div class="entry-content"><p>今天公司做了一次内部培训，讲师是陆其明，主题是程序员进阶之路。感觉讲的非常好，做个摘要留存一下</p>
 
-<p>用到的工具：Reveal，Charles，Hopper，越狱设备</p>
+<h2>程序员进阶的三个要素：</h2>
 
-<p>流畅的列表滑动可以很大的提升用户体验，尽量减少程序控制的透明色（GPU发现某层是不透明的，就不会计算它下面的层来显示了）和阴影都能提升UITableView滑动的流畅性。实时计算的圆角（CALayer的cornerRadius）也会加重GPU的运算，可是我们的程序经常会遇到需要用圆角的情况，所以如何高效的进行圆角显示就变得非常重要。</p>
+<h3>一、专业</h3>
 
-<p>Stack Overflow上也有一些优化的方案，比如让设计师提供带圆角，内部是透明色的图片；或者直接在服务器生成圆角图片等等。第一种方案不&#8221;优雅&#8221;，并且依然有透明色，第二种方案太死板，并且需服务端的支持。</p>
+<p><strong>没有救世主</strong>，不能指望别人，只能靠自己</p>
 
-<p>看到微信的聊天列表页也有头像是圆角，服务号头像是圆形，通讯录又没有圆角，而且滑动也很流畅，很好奇微信是如何实现的，于是打算使用工具分析一下。</p>
+<p><strong>静得下心</strong>，静下心来沉淀、积累，大牛不是一年两年就练就的</p>
 
-<!--more-->
+<p><strong>钻得进去</strong>，钻的深，才能了解真正的原理，而不是浮于表面</p>
 
+<p><strong>如痴如醉</strong>，当设计或是完成一个功能时，全身心的投入</p>
 
-<p>首先在越狱设备上安装微信，将Reveal的framework和dylib分别copy到越狱机的:/System/Library/Frameworks和:/Library/MobileSubstrate/DynamicLibrarie下，重启设备。之后可以看到微信的布局了</p>
+<p><strong>系统、全面</strong>，当对某个系统足够了解时，你站的高度就会高，对系统的整体运作也会有全面的认识</p>
 
-<p><img src="/images/blog/2014-6-17/reveal.png" title="weixin_layout" alt="Alt text" /></p>
+<p><strong>实战磨练</strong>，多多实践，实战岀真知，某种设计是不是有效，只有在使用的时候才知道</p>
 
-<p>通过Reveal我们看到微信头像是通过一个叫MainFrameHeadView展示的，那让我们看一下MainFrameHeadView大概是如何实现的，将微信的二进制文件拖到Hopper中，等待分析完成。</p>
+<p><strong>总结、积累</strong>，善于总结积累，下次遇到类似问题就容易解决了，而且经常总结会慢慢提高</p>
 
-<p>分析完成后，搜索MainFrameHeadView</p>
+<h3>二、分享</h3>
 
-<p><img src="/images/blog/2014-6-17/hopper.png" title="weixin_xxview" alt="Alt text" /></p>
+<p>勤加练习，如果你天天埋头写代码，连讨论、反思或者学习的时间都没有，你将得不到真正的进步。</p>
 
-<p>在这个类的代码段中，发现关键字CHeadImageMgr的getRoundImage:size:conerSize:forSence:方法，看其方法名就大概猜到是其对图片进行了圆角处理、或者是获取经过圆角处理的图片了。继续搜索CHeadImageMgr</p>
+<blockquote><p>eg：你天天开车上下班，但是你永远也不会成为真正的车手</p></blockquote>
 
-<p><img src="/images/blog/2014-6-17/c_head_m.png" title="weixin_cheadm" alt="Alt text" /></p>
+<p>要在磨练工艺宇思考如何提高工艺之间找到一个适当的平衡点</p>
 
-<p>看到此类基本就是对头像进行了各种各样的处理。通过Charles抓包，发现圆形头像实际是服务器生成好的</p>
+<p>开放的心态，阅读编程相关的博客或书籍，学会读源代码</p>
 
-<p><img src="/images/blog/2014-6-17/charles.png" title="weixin_circle" alt="Alt text" /></p>
+<p>最好的学习方法就是边做边学</p>
 
-<p>至此，我们大概知道，微信中对话列表的用户头像圆角是本地生成的。原始头像下载好后，很可能立刻进行图片处理，保留不带圆角和带圆角的头像并进行本地持久化。以后圆角头像如果再次用到，就先走内存缓存，内存没有检查本地，本地没有再从网络获取（类似SDWebImage，只不过多了一步下载完成后进行了图片处理）。</p>
+<p>成为杰出的程序员跟写代码没太大关系，坚韧不拔的精神很重要，更重要的是要有良好的沟通技巧</p>
 
-<p>本地缓存的圆角图片，跟背景颜色相同的UILabel，再加上不复杂的UI逻辑，你的UITableView也能像微信的对话列表一样流畅。</p>
+<p>想从优秀到卓越，必须培养起有效沟通的能力，与同事沟通，与老板沟通，与用户沟通，最终与全世界沟通</p>
+
+<p>如何提高沟通能力？写博客是个好方法</p>
+
+<h3>三、职业精神</h3>
+
+<p>关注公司战略，达成公司目标，与公司共同成长</p>
+
+<p>心态平和，内心有一份坚持，该做什么不该做什么，do the right thing</p>
+
+<p>快乐工作，快乐不是因为拥有的多，而是计较的少</p>
+
+<blockquote><p>eg：不要同事升职加薪，自己没有就不高兴</p></blockquote>
+
+<p>软件开发者的工作不是写代码，而是解决问题，关键是解决问题的能力</p>
+
+<h4>最后讲师还说了一些转型问题：</h4>
+
+<p>从一线开发变为管理，实际并不是晋升，而是转型了</p>
+
+<p>管理者的定义：管理者是通过别人来完成工作的人</p>
+
+<p>成为优秀的管理者要做到两点：确保你的员工能够工作，关心它们（把他们当人看，而不是资源）
+Keep them busy，make them happy</p>
+
+<blockquote><p>eg：老师问我，你这两天参加管理课程，你认为你的部下能完成工作的多少，我：50%吧（因为我技术比他们好很多，所以平时核心功能或者难点都是我来完成），老师：你这样不是管理者，而是super doer</p></blockquote>
 </div>
 
 
@@ -146,12 +172,12 @@
   
 
 
-<time datetime="2014-06-17T20:23:04+08:00" pubdate data-updated="true">2014-06-17 08:23PM</time>
+<time datetime="2016-08-18T22:41:50+08:00" pubdate data-updated="true">2016-08-18 10:41PM</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ios/'>iOS</a>
+    <a class='category' href='/blog/categories/za-tan/'>杂谈</a>
   
 </span>
 
@@ -191,10 +217,8 @@ var jiathis_config={
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/05/07/box2d-of-cocos2d/" title="Previous Post: cocos2d中的box2d">&laquo; cocos2d中的box2d</a>
+        <a class="basic-alignment left" href="/blog/2016/04/21/componentization/" title="Previous Post: 组件化之路">&laquo; 组件化之路</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/07/02/kmp/" title="Next Post: KMP模式匹配算法">KMP模式匹配算法 &raquo;</a>
       
     </p>
   </footer>
@@ -203,7 +227,7 @@ var jiathis_config={
 
   <section>
     <h1>Comments</h1>
-    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2014/06/17/optimize-app-by-analyze-weixin" data-title="分析微信来优化自己的应用" data-url="http://imrazor.github.io/blog/2014/06/17/optimize-app-by-analyze-weixin/"></div>
+    <div id="comments" aria-live="polite"><div class="ds-thread" data-thread-key="/blog/2016/08/18/programmer-advanced" data-title="程序员进阶之路" data-url="http://imrazor.github.io/blog/2016/08/18/programmer-advanced/"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"volcan1987"};
 	(function() {
